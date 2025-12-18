@@ -56,7 +56,7 @@ function render() {
             const delBtn = document.createElement("button");
             delBtn.className = "note-delete";
             delBtn.type = "button";
-            delBtn.textContent = "X";
+            delBtn.textContent = "✕";
             delBtn.dataset.widgetId = widget.id;
 
             header.appendChild(delBtn);
@@ -71,9 +71,19 @@ function render() {
 
 // Adds new note widget to state
 addNoteBtn.addEventListener("click", () => {
-    window.appState.widgets.push(window.createNoteWidget());
+    const newWidget = window.createNoteWidget();
+    const newWidgetId = newWidget.id;
+
+    window.appState.widgets.push(newWidget);
     saveState(window.appState);
     render();
+
+    const selector = `textarea[data-widget-id="${newWidgetId}"]`;
+    const textareaToFocus = document.querySelector(selector);
+
+    if (textareaToFocus) {
+          textareaToFocus.focus();
+      }
 });
 
 // Deletes widgets
