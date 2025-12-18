@@ -88,6 +88,9 @@ body {
   background: rgb(243, 233, 233);
   resize: vertical;
   font: inherit;
+  box-sizing: border-box;
+  overflow-y: hidden;
+  resize: none;
 }
 
 .note-text::placeholder {

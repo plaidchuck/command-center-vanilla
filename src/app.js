@@ -12,6 +12,11 @@ function mustBe(el, ctor, name) {
   return el;
 }
 
+function autosizeTextarea(textarea) {
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+}
+
 const dashboard = mustBe(mustGetElementById("dashboard"), HTMLElement, "#dashboard");
 const addNoteBtn = mustBe(mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn");
 const headerTitle = mustBe(mustGetElementById("headerTitle"), HTMLElement, "#headerTitle");
@@ -44,12 +49,12 @@ function render() {
             const noteCard = document.createElement("div");
             noteCard.className = "note-card";
 
-            const textArea = document.createElement("textarea");
-            textArea.className = "note-text";
+            const textarea = document.createElement("textarea");
+            textarea.className = "note-text";
 
-            textArea.value = widget.data?.text ?? "";
-            textArea.placeholder = "Write something ...";
-            textArea.dataset.widgetId = widget.id;
+            textarea.value = widget.data?.text ?? "";
+            textarea.placeholder = "Write something ...";
+            textarea.dataset.widgetId = widget.id;
             
             const header = document.createElement("div");
             header.className = "note-card-header";
@@ -63,8 +68,10 @@ function render() {
             header.appendChild(delBtn);
             noteCard.appendChild(header);
 
-            noteCard.appendChild(textArea);
+            noteCard.appendChild(textarea);
             dashboard.appendChild(noteCard);
+
+            autosizeTextarea(textarea);
         }
     }
   }
@@ -83,6 +90,7 @@ addNoteBtn.addEventListener("click", () => {
     const textareaToFocus = document.querySelector(selector);
 
     if (textareaToFocus) {
+          autosizeTextarea(textareaToFocus);
           textareaToFocus.focus();
       }
 });
@@ -135,6 +143,8 @@ dashboard.addEventListener("input", (event) => {
     }
     widget.data ??= {};
     widget.data.text = target.value;
+
+    autosizeTextarea(target);
 
     if (saveTimerId !== null) {
         clearTimeout(saveTimerId);
