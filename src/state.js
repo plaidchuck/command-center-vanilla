@@ -8,7 +8,7 @@ window.appState = {
 window.createNoteWidget = function () {
     const newId = "w_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
     const newType = "note";
-    const newText= "New note";
+    const newText= "";
     return {
         id: newId,
         type: newType,

@@ -90,6 +90,12 @@ body {
   font: inherit;
 }
 
+.note-text::placeholder {
+  color: #999;
+  opacity: 0.7;
+  font-style: italic;
+}
+
 .note-card-header {
   display: flex;
   justify-content: flex-end;

@@ -48,6 +48,7 @@ function render() {
             textArea.className = "note-text";
 
             textArea.value = widget.data?.text ?? "";
+            textArea.placeholder = "Write something ...";
             textArea.dataset.widgetId = widget.id;
             
             const header = document.createElement("div");
@@ -69,7 +70,7 @@ function render() {
   }
 }
 
-// Adds new note widget to state
+// Adds new note widget to dashboard and state
 addNoteBtn.addEventListener("click", () => {
     const newWidget = window.createNoteWidget();
     const newWidgetId = newWidget.id;
