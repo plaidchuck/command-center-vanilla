@@ -1,0 +1,103 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #1e1e1e;
+  color: #fff;
+}
+
+/* Header Buttons */
+.app-header button {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.8rem;
+}
+
+#addNoteBtn {
+  background: #2e7d32; /* muted green */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+
+#addNoteBtn:hover {
+  background: #388e3c;
+}
+
+#clearNotesBtn {
+  background: transparent;
+  color: #e57373;
+  border: 1px solid #e57373;
+  border-radius: 4px;
+}
+
+#clearNotesBtn:hover {
+  background: #e57373;
+  color: #1e1e1e;
+}
+
+#clearNotesBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+
+
+
+/* Dashboard */
+#dashboard {
+  flex: 1;
+  padding: 1rem;
+  background: #f3f3f3;
+  overflow: auto;
+}
+
+.note-card {
+  padding: 0.5rem;
+  margin-bottom: 0.75rem;
+  background: #d8c7c7;
+  border: 1px solid #000000;
+  position: relative;
+}
+
+.note-text {
+  width: 100%;
+  min-height: 4rem;
+  background: rgb(243, 233, 233);
+  resize: vertical;
+  font: inherit;
+}
+
+.note-card-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.note-delete {
+  border: 1px solid #ccc;
+  background: transparent;
+  cursor: pointer;
+}
