@@ -1,6 +1,16 @@
 // app.js
 console.log("Command Center booting…");
 
+function isValidAppState(state) {
+    return (
+        state &&
+        typeof state === "object" &&
+        typeof state.schemaVersion === "number" &&
+        Array.isArray(state.widgets)
+  );
+}
+
+
 function mustGetElementById(id) {
   const el = document.getElementById(id);
   if (!el) throw new Error(`Missing required element: #${id}`);
@@ -17,10 +27,22 @@ function autosizeTextarea(textarea) {
     textarea.style.height = `${textarea.scrollHeight}px`;
 }
 
+function createTimestamp() {
+    const currentDateTime = new Date();
+    return currentDateTime.getFullYear() + "-" +
+          String(currentDateTime.getMonth() + 1).padStart(2, "0") + "-" +
+          String(currentDateTime.getDate()).padStart(2, "0") + "_" +
+          String(currentDateTime.getHours()).padStart(2, "0") + "-" +
+          String(currentDateTime.getMinutes()).padStart(2, "0") + "-" +
+          String(currentDateTime.getSeconds()).padStart(2, "0");
+}
+
 const dashboard = mustBe(mustGetElementById("dashboard"), HTMLElement, "#dashboard");
 const addNoteBtn = mustBe(mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn");
 const headerTitle = mustBe(mustGetElementById("headerTitle"), HTMLElement, "#headerTitle");
 const clearNotesBtn = mustBe(mustGetElementById("clearNotesBtn"), HTMLButtonElement, "#clearNotesBtn");
+const exportBtn = mustBe(mustGetElementById("exportBtn"), HTMLButtonElement, "#exportBtn");
+const importBtn = mustBe(mustGetElementById("importBtn"), HTMLButtonElement, "#importBtn");
 
 let saveTimerId = null;
 
@@ -76,6 +98,46 @@ function render() {
     }
   }
 }
+
+// Export to JSON button listener
+exportBtn.addEventListener("click", () => {
+    try {
+        if (!isValidAppState(window.appState)) {
+            alert("Cannot export: application state is invalid.");
+            return;
+        }
+  
+        if (window.appState.widgets.length === 0) {
+            const ok = confirm("There are no notes. Export anyway?");
+            if (!ok) return;
+        }
+        
+        const appstateAsString = JSON.stringify(window.appState, null, 2);
+        const appstateAsBlob = new Blob([appstateAsString], {type: "application/json"});
+        const appstateURLObject = URL.createObjectURL(appstateAsBlob);
+  
+        const anchorElement = document.createElement("a");
+        anchorElement.href = appstateURLObject;
+  
+        const timestamp = createTimestamp();
+        anchorElement.download = `command-center-${timestamp}.json`;
+  
+        document.body.appendChild(anchorElement);
+        anchorElement.click();
+        anchorElement.remove();
+  
+        setTimeout(() => URL.revokeObjectURL(appstateURLObject), 0);
+    } catch (error) {
+          console.error(err);
+          alert("Export failed. See console for details.");
+    }
+});
+
+// Import JSON/state button listener
+importBtn.addEventListener("click", () => {
+  console.log("import");
+});
+
 
 // Adds new note widget to dashboard and state
 addNoteBtn.addEventListener("click", () => {
