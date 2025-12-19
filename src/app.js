@@ -44,6 +44,13 @@ const clearNotesBtn = mustBe(mustGetElementById("clearNotesBtn"), HTMLButtonElem
 const exportBtn = mustBe(mustGetElementById("exportBtn"), HTMLButtonElement, "#exportBtn");
 const importBtn = mustBe(mustGetElementById("importBtn"), HTMLButtonElement, "#importBtn");
 
+//import file input must be set up globally to persist throughout
+const importFileInput = document.createElement("input");
+importFileInput.type = "file";
+importFileInput.accept = ".json,application/json";
+importFileInput.style.display = "none";
+document.body.appendChild(importFileInput);
+
 let saveTimerId = null;
 
 const sessionState = loadState();
@@ -111,7 +118,7 @@ exportBtn.addEventListener("click", () => {
             const ok = confirm("There are no notes. Export anyway?");
             if (!ok) return;
         }
-        
+
         const appstateAsString = JSON.stringify(window.appState, null, 2);
         const appstateAsBlob = new Blob([appstateAsString], {type: "application/json"});
         const appstateURLObject = URL.createObjectURL(appstateAsBlob);
@@ -128,14 +135,59 @@ exportBtn.addEventListener("click", () => {
   
         setTimeout(() => URL.revokeObjectURL(appstateURLObject), 0);
     } catch (error) {
-          console.error(err);
+          console.error(error);
           alert("Export failed. See console for details.");
     }
 });
 
-// Import JSON/state button listener
-importBtn.addEventListener("click", () => {
-  console.log("import");
+// Import button listener
+importBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    importFileInput.value = "";
+    importFileInput.click();
+});
+
+// File input listener
+importFileInput.addEventListener("change", async () => {
+    const file = importFileInput.files?.[0];
+    if (!file) return;
+
+    let text;
+
+    try {
+      text = await file.text();
+    } catch (err) {
+        console.error(err);
+        alert("Could not read file");
+        return;
+    }
+
+    let importedState;
+
+    try {
+            importedState = JSON.parse(text);
+        } catch (err) {
+          console.error(err);
+            alert("Invalid json file.");
+            return;
+    }
+
+    if (!isValidAppState(importedState)) {
+        alert("Invalid note format");
+        return;
+    }
+
+    if (importedState.schemaVersion !== window.appState.schemaVersion) {
+        alert(`Unsupported file version.\nExpected schema v${window.appState.schemaVersion}, got v${importedState.schemaVersion}.`);
+        return;
+    }
+
+    const ok = confirm("Import will replace your current notes. Continue?");
+    if (!ok) return;
+    
+    window.appState = importedState;
+    saveState(window.appState);
+    render();
 });
 
 
