@@ -35,6 +35,28 @@ body {
   gap: 0.8rem;
 }
 
+#exportBtn {
+  background: goldenrod;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+
+#exportBtn:hover {
+  background: rgb(250, 193, 50);
+}
+
+#importBtn {
+  background: rgb(50, 50, 214);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+
+#importBtn:hover {
+  background: rgb(78, 78, 245);
+}
+
 #addNoteBtn {
   background: #2e7d32; /* muted green */
   color: #fff;
@@ -62,8 +84,6 @@ body {
   opacity: 0.4;
   cursor: not-allowed;
 }
-
-
 
 
 /* Dashboard */
