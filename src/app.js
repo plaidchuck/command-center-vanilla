@@ -41,7 +41,7 @@ function createTimestamp() {
 
 function showToast(message, type = "info", durationMs = 3000) {
   if (!["info","success","error"].includes(type)) type = "info";
-  
+
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
 
@@ -55,7 +55,6 @@ function showToast(message, type = "info", durationMs = 3000) {
 
   toast.appendChild(messageSpan);
   toast.appendChild(closeBtn);
-
   toastHost.appendChild(toast);
 
   let removeTimer = setTimeout(removeToast, durationMs);
@@ -65,8 +64,21 @@ function showToast(message, type = "info", durationMs = 3000) {
     removeToast();
   });
 
+  let isRemoving = false;
+
   function removeToast() {
-    toast.remove();
+    if (isRemoving) return;
+    isRemoving = true;
+
+    toast.classList.add("toast-out");
+
+    toast.addEventListener(
+      "animationend",
+      () => {
+          toast.remove();
+      },
+      { once: true}
+    );
   }
 }
 
