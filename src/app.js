@@ -1,6 +1,8 @@
 // app.js
 console.log("Command Center booting…");
 
+// Helpers
+
 function isValidAppState(state) {
     return (
         state &&
@@ -37,14 +39,46 @@ function createTimestamp() {
           String(currentDateTime.getSeconds()).padStart(2, "0");
 }
 
+function showToast(message, type = "info", durationMs = 3000) {
+  if (!["info","success","error"].includes(type)) type = "info";
+  
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+
+  const messageSpan = document.createElement("span");
+  messageSpan.textContent = message;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "toast-close";
+  closeBtn.type = "button";
+  closeBtn.textContent = "×";
+
+  toast.appendChild(messageSpan);
+  toast.appendChild(closeBtn);
+
+  toastHost.appendChild(toast);
+
+  let removeTimer = setTimeout(removeToast, durationMs);
+
+  closeBtn.addEventListener("click", () => {
+    clearTimeout(removeTimer);
+    removeToast();
+  });
+
+  function removeToast() {
+    toast.remove();
+  }
+}
+
 const dashboard = mustBe(mustGetElementById("dashboard"), HTMLElement, "#dashboard");
 const addNoteBtn = mustBe(mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn");
 const headerTitle = mustBe(mustGetElementById("headerTitle"), HTMLElement, "#headerTitle");
 const clearNotesBtn = mustBe(mustGetElementById("clearNotesBtn"), HTMLButtonElement, "#clearNotesBtn");
 const exportBtn = mustBe(mustGetElementById("exportBtn"), HTMLButtonElement, "#exportBtn");
 const importBtn = mustBe(mustGetElementById("importBtn"), HTMLButtonElement, "#importBtn");
+const toastHost = mustBe(mustGetElementById("toastHost"), HTMLElement, "#toastHost");
 
-//import file input must be set up globally to persist throughout
+//import file input must be set up globally to persist throughout for async reasons
 const importFileInput = document.createElement("input");
 importFileInput.type = "file";
 importFileInput.accept = ".json,application/json";
@@ -57,7 +91,6 @@ const sessionState = loadState();
 if (sessionState && typeof sessionState === "object" && Array.isArray(sessionState.widgets)) {
   window.appState = sessionState;
 }
-
 
 // render it all
 function render() {
@@ -106,6 +139,8 @@ function render() {
   }
 }
 
+// Listeners
+
 // Export to JSON button listener
 exportBtn.addEventListener("click", () => {
     try {
@@ -131,12 +166,13 @@ exportBtn.addEventListener("click", () => {
   
         document.body.appendChild(anchorElement);
         anchorElement.click();
+        showToast(`Export: ${anchorElement.download}`, "success");
         anchorElement.remove();
   
         setTimeout(() => URL.revokeObjectURL(appstateURLObject), 0);
     } catch (error) {
           console.error(error);
-          alert("Export failed. See console for details.");
+          showToast("Export failed. See console for details.", "error", 5000);
     }
 });
 
@@ -152,43 +188,39 @@ importFileInput.addEventListener("change", async () => {
     const file = importFileInput.files?.[0];
     if (!file) return;
 
-    let text;
-
     try {
-      text = await file.text();
-    } catch (err) {
-        console.error(err);
-        alert("Could not read file");
-        return;
-    }
-
-    let importedState;
-
-    try {
-            importedState = JSON.parse(text);
-        } catch (err) {
-          console.error(err);
-            alert("Invalid json file.");
-            return;
-    }
+        const text = await file.text();
+        const importedState = JSON.parse(text);
 
     if (!isValidAppState(importedState)) {
-        alert("Invalid note format");
+        showToast("Invalid JSON file", "error", 5000);
         return;
     }
 
     if (importedState.schemaVersion !== window.appState.schemaVersion) {
-        alert(`Unsupported file version.\nExpected schema v${window.appState.schemaVersion}, got v${importedState.schemaVersion}.`);
+        showToast(
+            `Unsupported file version.\nExpected schema v${window.appState.schemaVersion}, got v${importedState.schemaVersion}.`,
+            "error", 5000);
         return;
     }
 
     const ok = confirm("Import will replace your current notes. Continue?");
     if (!ok) return;
-    
+
     window.appState = importedState;
     saveState(window.appState);
     render();
+    const widgetsSize = window.appState.widgets.length;
+    showToast(`Imported ${widgetsSize} ${widgetsSize === 1 ? "note" : "notes"}`, "success");
+
+    } catch (err) {
+        console.error(err);
+        showToast("Import failed (invalid file).", "error", 5000);
+    } finally {
+        importFileInput.value = "";
+    }
 });
+
 
 
 // Adds new note widget to dashboard and state
