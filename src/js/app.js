@@ -1,6 +1,12 @@
 // app.js
 console.log("Command Dashboard booting…");
 
+if (!window.CommandDashboard?.dom) {
+  throw new Error("CommandDashboard.dom not loaded. Check script order / namespace name.");
+}
+
+const { mustGetElementById, mustBe } = CommandDashboard.dom;
+
 // Helpers
 
 function isValidAppState(state) {
@@ -10,18 +16,6 @@ function isValidAppState(state) {
         typeof state.schemaVersion === "number" &&
         Array.isArray(state.widgets)
   );
-}
-
-
-function mustGetElementById(id) {
-  const el = document.getElementById(id);
-  if (!el) throw new Error(`Missing required element: #${id}`);
-  return el;
-}
-
-function mustBe(el, ctor, name) {
-  if (!(el instanceof ctor)) throw new Error(`${name} is not a ${ctor.name}`);
-  return el;
 }
 
 function autosizeTextarea(textarea) {

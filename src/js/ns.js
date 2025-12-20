@@ -1,0 +1,1 @@
+window.CommandDashboard = window.CommandDashboard ?? {};
