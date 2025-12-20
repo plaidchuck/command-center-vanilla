@@ -40,46 +40,69 @@ function createTimestamp() {
 }
 
 function showToast(message, type = "info", durationMs = 3000) {
-  if (!["info","success","error"].includes(type)) type = "info";
+    const MAX_TOASTS = 3;
 
-  const toast = document.createElement("div");
-  toast.className = `toast ${type}`;
+    if (!["info","success","error"].includes(type)) type = "info";
 
-  const messageSpan = document.createElement("span");
-  messageSpan.textContent = message;
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
 
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "toast-close";
-  closeBtn.type = "button";
-  closeBtn.textContent = "×";
+    const messageSpan = document.createElement("span");
+    messageSpan.textContent = message;
 
-  toast.appendChild(messageSpan);
-  toast.appendChild(closeBtn);
-  toastHost.appendChild(toast);
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "toast-close";
+    closeBtn.type = "button";
+    closeBtn.textContent = "×";
 
-  let removeTimer = setTimeout(removeToast, durationMs);
+    toast.appendChild(messageSpan);
+    toast.appendChild(closeBtn);
 
-  closeBtn.addEventListener("click", () => {
-    clearTimeout(removeTimer);
-    removeToast();
-  });
+    toastHost.appendChild(toast);
 
-  let isRemoving = false;
+    let isRemoving = false;
 
-  function removeToast() {
-    if (isRemoving) return;
-    isRemoving = true;
+    function removeToast() {
+        if (isRemoving) return;
+        isRemoving = true;
 
-    toast.classList.add("toast-out");
+        toast.classList.add("toast-out");
 
-    toast.addEventListener(
-      "animationend",
-      () => {
-          toast.remove();
-      },
-      { once: true}
-    );
-  }
+        toast.addEventListener(
+            "animationend",
+            () => {
+                toast.remove();
+            },
+              { once: true });
+      }
+
+    const removeTimer = setTimeout(removeToast, durationMs);
+    toast._removeTimer = removeTimer;
+
+    closeBtn.addEventListener("click", () => {
+        clearTimeout(removeTimer);
+        removeToast();
+    });
+
+    if (toastHost.children.length > MAX_TOASTS) {
+        // oldest is first node, like stack
+        const oldestToast = toastHost.children[0];
+        dismissOldestToast(oldestToast);
+    }
+
+
+    function dismissOldestToast(oldestToast) {
+        if (oldestToast.classList.contains("toast-out")) return;
+        if (oldestToast._removeTimer) clearTimeout(oldestToast._removeTimer);
+
+        oldestToast.classList.add("toast-out");
+        oldestToast.addEventListener(
+            "animationend",
+            () => {
+              oldestToast.remove();
+            },
+            { once: true });
+    }
 }
 
 const dashboard = mustBe(mustGetElementById("dashboard"), HTMLElement, "#dashboard");
