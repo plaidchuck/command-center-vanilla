@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title id>Command Center</title>
+  <title id>Command Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -23,8 +23,12 @@
 
   <div id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
-  <script defer src="state.js"></script>
-  <script defer src="storage.js"></script>
-  <script defer src="app.js"></script>
+  <!-- load order:
+     1) state.js defines window.appState + factory helpers
+     2) storage.js defines loadState/saveState
+     3) app.js boots the UI and wires listeners -->
+  <script defer src="js/state.js"></script>
+  <script defer src="js/storage.js"></script>
+  <script defer src="js/app.js"></script>
 </body>
 </html>

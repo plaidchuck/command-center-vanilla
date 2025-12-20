@@ -1,5 +1,5 @@
 // app.js
-console.log("Command Center booting…");
+console.log("Command Dashboard booting…");
 
 // Helpers
 
@@ -197,7 +197,7 @@ exportBtn.addEventListener("click", () => {
         anchorElement.href = appstateURLObject;
   
         const timestamp = createTimestamp();
-        anchorElement.download = `command-center-${timestamp}.json`;
+        anchorElement.download = `command-dashboard-${timestamp}.json`;
   
         document.body.appendChild(anchorElement);
         anchorElement.click();
@@ -339,7 +339,7 @@ dashboard.addEventListener("input", (event) => {
 
 // Change title or use default
 headerTitle.addEventListener("input", () => {
-  window.appState.title = headerTitle.textContent.trim() || "Command Center";
+  window.appState.title = headerTitle.textContent.trim() || "Command Dashboard";
 
   if (saveTimerId !== null) {
     clearTimeout(saveTimerId);

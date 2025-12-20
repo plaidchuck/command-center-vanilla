@@ -1,5 +1,5 @@
 // storage.js
-const STORAGE_KEY = "command-center-state";
+const STORAGE_KEY = "command-dashboard-state";
 
 function loadState() {
     const serializedSavedState = localStorage.getItem(STORAGE_KEY);

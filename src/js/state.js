@@ -1,6 +1,6 @@
 // state.js
 window.appState = {
-    title: "Command Center",
+    title: "Command Dashboard",
     schemaVersion: 1,
     widgets: []
 };
