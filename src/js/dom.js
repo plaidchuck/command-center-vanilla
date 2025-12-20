@@ -1,5 +1,3 @@
-window.CommandDashboard = window.CommandDashboard ?? {};
-
 CommandDashboard.dom = (function () {
     function mustGetElementById(id) {
         const el = document.getElementById(id);
