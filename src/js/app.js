@@ -1,13 +1,10 @@
 // app.js
+window.CommandDashboard = window.CommandDashboard ?? {};
 console.log("Command Dashboard booting…");
 
 if (!window.CommandDashboard?.dom) {
   throw new Error("CommandDashboard.dom not loaded. Check script order / namespace name.");
 }
-
-// Destructure functions/helpers
-const { mustGetElementById, mustBe } = CommandDashboard.dom;
-const { show: showToast } = CommandDashboard.toast;
 
 // Helpers
 
@@ -25,23 +22,12 @@ function autosizeTextarea(textarea) {
     textarea.style.height = `${textarea.scrollHeight}px`;
 }
 
-function createTimestamp() {
-    const currentDateTime = new Date();
-    return currentDateTime.getFullYear() + "-" +
-          String(currentDateTime.getMonth() + 1).padStart(2, "0") + "-" +
-          String(currentDateTime.getDate()).padStart(2, "0") + "_" +
-          String(currentDateTime.getHours()).padStart(2, "0") + "-" +
-          String(currentDateTime.getMinutes()).padStart(2, "0") + "-" +
-          String(currentDateTime.getSeconds()).padStart(2, "0");
-}
-
-
-const dashboard = mustBe(mustGetElementById("dashboard"), HTMLElement, "#dashboard");
-const addNoteBtn = mustBe(mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn");
-const headerTitle = mustBe(mustGetElementById("headerTitle"), HTMLElement, "#headerTitle");
-const clearNotesBtn = mustBe(mustGetElementById("clearNotesBtn"), HTMLButtonElement, "#clearNotesBtn");
-const exportBtn = mustBe(mustGetElementById("exportBtn"), HTMLButtonElement, "#exportBtn");
-const importBtn = mustBe(mustGetElementById("importBtn"), HTMLButtonElement, "#importBtn");
+const dashboard = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("dashboard"), HTMLElement, "#dashboard");
+const addNoteBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn");
+const headerTitle = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("headerTitle"), HTMLElement, "#headerTitle");
+const clearNotesBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("clearNotesBtn"), HTMLButtonElement, "#clearNotesBtn");
+const exportBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("exportBtn"), HTMLButtonElement, "#exportBtn");
+const importBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("importBtn"), HTMLButtonElement, "#importBtn");
 
 //import file input must be set up globally to persist throughout for async reasons
 const importFileInput = document.createElement("input");
@@ -108,36 +94,24 @@ function render() {
 
 // Export to JSON button listener
 exportBtn.addEventListener("click", () => {
-    try {
-        if (!isValidAppState(window.appState)) {
-            alert("Cannot export: application state is invalid.");
-            return;
-        }
+    if (!isValidAppState(window.appState)) {
+        CommandDashboard.toast.show("Cannot export: application state is invalid.", "error");
+        return;
+    }
   
-        if (window.appState.widgets.length === 0) {
-            const ok = confirm("There are no notes. Export anyway?");
-            if (!ok) return;
-        }
+    if (window.appState.widgets.length === 0) {
+        const ok = confirm("There are no notes. Export anyway?");
+        if (!ok) return;
+    }
 
-        const appstateAsString = JSON.stringify(window.appState, null, 2);
-        const appstateAsBlob = new Blob([appstateAsString], {type: "application/json"});
-        const appstateURLObject = URL.createObjectURL(appstateAsBlob);
-  
-        const anchorElement = document.createElement("a");
-        anchorElement.href = appstateURLObject;
-  
-        const timestamp = createTimestamp();
-        anchorElement.download = `command-dashboard-${timestamp}.json`;
-  
-        document.body.appendChild(anchorElement);
-        anchorElement.click();
-        showToast(`Export: ${anchorElement.download}`, "success");
-        anchorElement.remove();
-  
-        setTimeout(() => URL.revokeObjectURL(appstateURLObject), 0);
+    const filenamePrefix = "command-dashboard";
+
+    try {
+        const downloadFilename = CommandDashboard.io.exportStateToJson(window.appState, filenamePrefix);
+        CommandDashboard.toast.show(`Export: ${downloadFilename}`, "success");
     } catch (error) {
-          console.error(error);
-          showToast("Export failed. See console for details.", "error", 5000);
+        console.error(error);
+        CommandDashboard.toast.show("Export failed. See console for details.", "error", 5000);
     }
 });
 
@@ -158,12 +132,12 @@ importFileInput.addEventListener("change", async () => {
         const importedState = JSON.parse(text);
 
     if (!isValidAppState(importedState)) {
-        showToast("Invalid JSON file", "error", 5000);
+        CommandDashboard.toast.show("Invalid JSON file", "error", 5000);
         return;
     }
 
     if (importedState.schemaVersion !== window.appState.schemaVersion) {
-        showToast(
+        CommandDashboard.toast.show(
             `Unsupported file version.\nExpected schema v${window.appState.schemaVersion}, got v${importedState.schemaVersion}.`,
             "error", 5000);
         return;
@@ -176,11 +150,11 @@ importFileInput.addEventListener("change", async () => {
     saveState(window.appState);
     render();
     const widgetsSize = window.appState.widgets.length;
-    showToast(`Imported ${widgetsSize} ${widgetsSize === 1 ? "note" : "notes"}`, "success");
+    CommandDashboard.toast.show(`Imported ${widgetsSize} ${widgetsSize === 1 ? "note" : "notes"}`, "success");
 
     } catch (err) {
         console.error(err);
-        showToast("Import failed (invalid file).", "error", 5000);
+        CommandDashboard.toast.show("Import failed (invalid file).", "error", 5000);
     } finally {
         importFileInput.value = "";
     }

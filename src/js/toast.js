@@ -1,17 +1,18 @@
+"use strict";
+window.CommandDashboard = window.CommandDashboard ?? {};
 CommandDashboard.toast = CommandDashboard.toast ?? {};
 
 if (!CommandDashboard.dom) {
     throw new Error("toast.js loaded before dom.js (CommandDashboard.dom missing). Check script order.");
 }
 
-const { mustGetElementById: getElById, mustBe: mustBeInstanceOf } = CommandDashboard.dom;
-const toastHost = mustBeInstanceOf(getElById("toastHost"), HTMLElement, "#toastHost");
+const toastHost = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("toastHost"), HTMLElement, "#toastHost");
 
 CommandDashboard.toast.show = function showToast(message, type = "info", durationMs = 3000) {
     const MAX_TOASTS = 3;
 
     if (!["info","success","error"].includes(type)) type = "info";
-
+    
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
 
