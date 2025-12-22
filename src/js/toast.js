@@ -1,6 +1,7 @@
 "use strict";
 window.CommandDashboard = window.CommandDashboard ?? {};
 CommandDashboard.toast = CommandDashboard.toast ?? {};
+console.log("Toast display functionality loaded");
 
 if (!CommandDashboard.dom) {
     throw new Error("toast.js loaded before dom.js (CommandDashboard.dom missing). Check script order.");
@@ -8,10 +9,24 @@ if (!CommandDashboard.dom) {
 
 const toastHost = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("toastHost"), HTMLElement, "#toastHost");
 
-CommandDashboard.toast.show = function showToast(message, type = "info", durationMs = 3000) {
-    const MAX_TOASTS = 3;
+const VALID_TYPES = new Set(["info", "success", "error"]);
+const MAX_TOASTS = 3;
 
-    if (!["info","success","error"].includes(type)) type = "info";
+function _dismissToast(toastEl) {
+  if (!toastEl || toastEl._isRemoving) return;
+  toastEl._isRemoving = true;
+
+  if (toastEl._removeTimer) {
+    clearTimeout(toastEl._removeTimer);
+    toastEl._removeTimer = null;
+  }
+
+  toastEl.classList.add("toast-out");
+  toastEl.addEventListener("animationend", () => toastEl.remove(), { once: true });
+}
+
+CommandDashboard.toast.show = function showToast(message, type = "info", durationMs = 3000) {
+    if (!VALID_TYPES.has(type)) type = "info";
     
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
@@ -24,52 +39,19 @@ CommandDashboard.toast.show = function showToast(message, type = "info", duratio
     closeBtn.type = "button";
     closeBtn.textContent = "×";
 
-    toast.appendChild(messageSpan);
-    toast.appendChild(closeBtn);
-
-    toastHost.appendChild(toast);
-
-    let isRemoving = false;
-
-    function removeToast() {
-        if (isRemoving) return;
-        isRemoving = true;
-
-        toast.classList.add("toast-out");
-
-        toast.addEventListener(
-            "animationend",
-            () => {
-                toast.remove();
-            },
-              { once: true });
-      }
-
-    const removeTimer = setTimeout(removeToast, durationMs);
-    toast._removeTimer = removeTimer;
-
     closeBtn.addEventListener("click", (event) => {
         event.preventDefault();
-        clearTimeout(removeTimer);
-        removeToast();
+        _dismissToast(toast);
     });
 
+    toast.appendChild(messageSpan);
+    toast.appendChild(closeBtn);
+    toastHost.appendChild(toast);
+
+    toast._removeTimer = setTimeout(() => _dismissToast(toast), durationMs);
+
     if (toastHost.childElementCount > MAX_TOASTS) {
-        const oldestToast = toastHost.children[0];
-        dismissOldestToast(oldestToast);
+        _dismissToast(toastHost.children[0]);
     }
 
-
-    function dismissOldestToast(oldestToast) {
-        if (oldestToast.classList.contains("toast-out")) return;
-        if (oldestToast._removeTimer) clearTimeout(oldestToast._removeTimer);
-
-        oldestToast.classList.add("toast-out");
-        oldestToast.addEventListener(
-            "animationend",
-            () => {
-              oldestToast.remove();
-            },
-            { once: true });
-    }
 }

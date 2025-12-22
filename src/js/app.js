@@ -1,6 +1,6 @@
 // app.js
 window.CommandDashboard = window.CommandDashboard ?? {};
-console.log("Command Dashboard booting…");
+console.log("app.js booting…");
 
 if (!window.CommandDashboard?.dom) {
   throw new Error("CommandDashboard.dom not loaded. Check script order / namespace name.");
@@ -28,19 +28,14 @@ const headerTitle = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElem
 const clearNotesBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("clearNotesBtn"), HTMLButtonElement, "#clearNotesBtn");
 const exportBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("exportBtn"), HTMLButtonElement, "#exportBtn");
 const importBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("importBtn"), HTMLButtonElement, "#importBtn");
-
-//import file input must be set up globally to persist throughout for async reasons
-const importFileInput = document.createElement("input");
-importFileInput.type = "file";
-importFileInput.accept = ".json,application/json";
-importFileInput.style.display = "none";
-document.body.appendChild(importFileInput);
+const importFileInput = CommandDashboard.io.getImportInput();
 
 let saveTimerId = null;
 
 const sessionState = loadState();
 if (sessionState && typeof sessionState === "object" && Array.isArray(sessionState.widgets)) {
   window.appState = sessionState;
+  console.log("Initial state loaded successfully");
 }
 
 // render it all
@@ -118,13 +113,13 @@ exportBtn.addEventListener("click", () => {
 // Import button listener
 importBtn.addEventListener("click", (event) => {
     event.preventDefault();
-    importFileInput.value = "";
-    importFileInput.click();
+    CommandDashboard.io.openImportPicker();
 });
 
 // File input listener
 importFileInput.addEventListener("change", async () => {
     const file = importFileInput.files?.[0];
+    importFileInput.value = "";
     if (!file) return;
 
     try {

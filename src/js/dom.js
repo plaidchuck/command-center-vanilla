@@ -1,5 +1,6 @@
 window.CommandDashboard = window.CommandDashboard ?? {};
 CommandDashboard.dom = CommandDashboard.dom ?? {};
+console.log("DOM guards loaded");
 
 CommandDashboard.dom = (function () {
     function mustGetElementById(id) {

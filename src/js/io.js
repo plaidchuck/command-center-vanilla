@@ -1,7 +1,11 @@
+"use strict";
 window.CommandDashboard = window.CommandDashboard ?? {};
 CommandDashboard.io = CommandDashboard.io ?? {};
+console.log("Widget I/O loaded");
 
-CommandDashboard.io.createTimestamp = function createTimestamp() {
+// Helpers
+
+CommandDashboard.io._createTimestamp = function createTimestamp() {
     const currentDateTime = new Date();
     return ( currentDateTime.getFullYear() + "-" +
         String(currentDateTime.getMonth() + 1).padStart(2, "0") + "-" +
@@ -13,26 +17,40 @@ CommandDashboard.io.createTimestamp = function createTimestamp() {
 }
 
 CommandDashboard.io.exportStateToJson = function exportStateToJson(state, filenamePrefix = "command-dashboard") {
-    try {
-            const json = JSON.stringify(state, null, 2);
-            const blob = new Blob([json], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
+    const json = JSON.stringify(state, null, 2);
+    const blob = new Blob([json], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
     
-            const anchorElement = document.createElement("a");
-            anchorElement.href = url;
+    const anchorElement = document.createElement("a");
+    anchorElement.href = url;
     
-            const timestamp = CommandDashboard.io.createTimestamp();
-            anchorElement.download = `${filenamePrefix}-${timestamp}.json`;
+    const timestamp = CommandDashboard.io._createTimestamp();
+    anchorElement.download = `${filenamePrefix}-${timestamp}.json`;
     
-            document.body.appendChild(anchorElement);
-            anchorElement.click();
-            anchorElement.remove();
+    document.body.appendChild(anchorElement);
+    anchorElement.click();
+    anchorElement.remove();
     
-            setTimeout(() => URL.revokeObjectURL(url), 0);
+    setTimeout(() => URL.revokeObjectURL(url), 0);
     
-            return anchorElement.download;
-    
-    } catch (error) {
-        console.log(error);
-        throw new Error("EXPORT_FAILED");
-}};
+    return anchorElement.download;
+};
+
+CommandDashboard.io.getImportInput = function getImportInput() {
+    if (CommandDashboard.io._importFileInput) return CommandDashboard.io._importFileInput;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.style.display = "none";
+    document.body.appendChild(input);
+
+    CommandDashboard.io._importFileInput = input;
+    return input;
+};
+
+CommandDashboard.io.openImportPicker = function openImportPicker() {
+    const importFileInput = CommandDashboard.io.getImportInput();
+    importFileInput.value = "";
+    importFileInput.click();
+}
