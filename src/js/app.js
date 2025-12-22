@@ -17,10 +17,6 @@ function isValidAppState(state) {
   );
 }
 
-function autosizeTextarea(textarea) {
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-}
 
 const dashboard = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("dashboard"), HTMLElement, "#dashboard");
 const addNoteBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn");
@@ -34,59 +30,19 @@ let saveTimerId = null;
 
 const sessionState = loadState();
 if (sessionState && typeof sessionState === "object" && Array.isArray(sessionState.widgets)) {
-  window.appState = sessionState;
-  console.log("Initial state loaded successfully");
+    window.appState = sessionState;
+    console.log("Initial state loaded successfully");
 }
 
-// render it all
-function render() {
-  headerTitle.textContent = window.appState.title;
-  dashboard.innerHTML = "";
+// Load render.js with main non widget elements
 
-  const hasNotes = window.appState.widgets.some(w => w.type === "note");
-  clearNotesBtn.disabled = !hasNotes;
-
-  if (window.appState.widgets.length === 0) {
-    const msg = document.createElement("div");
-    msg.textContent = "No widgets yet — click + Note to add one.";
-    msg.style.opacity = "0.6";
-    dashboard.appendChild(msg);
-  } else {
-    for (const widget of window.appState.widgets) {
-        if (widget.type === "note") {
-            const noteCard = document.createElement("div");
-            noteCard.className = "note-card";
-
-            const textarea = document.createElement("textarea");
-            textarea.className = "note-text";
-
-            textarea.value = widget.data?.text ?? "";
-            textarea.placeholder = "Write something ...";
-            textarea.dataset.widgetId = widget.id;
-            
-            const header = document.createElement("div");
-            header.className = "note-card-header";
-
-            const delBtn = document.createElement("button");
-            delBtn.className = "note-delete";
-            delBtn.type = "button";
-            delBtn.textContent = "✕";
-            delBtn.dataset.widgetId = widget.id;
-
-            header.appendChild(delBtn);
-            noteCard.appendChild(header);
-
-            noteCard.appendChild(textarea);
-            dashboard.appendChild(noteCard);
-
-            autosizeTextarea(textarea);
-        }
-    }
-  }
-}
+CommandDashboard.render.init({
+    dashboard,
+    headerTitle,
+    clearNotesBtn
+})
 
 // Listeners
-
 // Export to JSON button listener
 exportBtn.addEventListener("click", () => {
     if (!isValidAppState(window.appState)) {
@@ -143,7 +99,8 @@ importFileInput.addEventListener("change", async () => {
 
     window.appState = importedState;
     saveState(window.appState);
-    render();
+    (CommandDashboard.render.renderApp(window.appState));
+    
     const widgetsSize = window.appState.widgets.length;
     CommandDashboard.toast.show(`Imported ${widgetsSize} ${widgetsSize === 1 ? "note" : "notes"}`, "success");
 
@@ -164,13 +121,13 @@ addNoteBtn.addEventListener("click", () => {
 
     window.appState.widgets.push(newWidget);
     saveState(window.appState);
-    render();
+    CommandDashboard.render.renderApp(window.appState);
 
     const selector = `textarea[data-widget-id="${newWidgetId}"]`;
     const textareaToFocus = document.querySelector(selector);
 
     if (textareaToFocus) {
-          autosizeTextarea(textareaToFocus);
+          CommandDashboard.render.autosizeTextarea(textareaToFocus);
           textareaToFocus.focus();
       }
 });
@@ -189,7 +146,7 @@ dashboard.addEventListener("click", (event) => {
                               .filter(arrayWidget => arrayWidget.id !== widgetId);
     
     saveState(window.appState);
-    render();
+    CommandDashboard.render.renderApp(window.appState);
 });
 
 // Deletes all widgets
@@ -202,7 +159,7 @@ clearNotesBtn.addEventListener("click", (event) => {
     window.appState.widgets = window.appState.widgets.filter(arrayWidget => arrayWidget.type !== "note");
 
     saveState(window.appState);
-    render();
+    CommandDashboard.render.renderApp(window.appState);
 
 });
 
@@ -224,7 +181,7 @@ dashboard.addEventListener("input", (event) => {
     widget.data ??= {};
     widget.data.text = target.value;
 
-    autosizeTextarea(target);
+    CommandDashboard.render.autosizeTextarea(target);
 
     if (saveTimerId !== null) {
         clearTimeout(saveTimerId);
@@ -258,4 +215,4 @@ headerTitle.addEventListener("keydown", (event) => {
   }
 });
 
-render();
+CommandDashboard.render.renderApp(window.appState);
