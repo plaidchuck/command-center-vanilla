@@ -17,6 +17,12 @@ function isValidAppState(state) {
   );
 }
 
+function applyAndRender(mutatorFunction) {
+    mutatorFunction(window.appState);
+    saveState(window.appState);
+    CommandDashboard.render.renderApp(window.appState);
+}
+
 
 const dashboard = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("dashboard"), HTMLElement, "#dashboard");
 const addNoteBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn");
@@ -113,23 +119,13 @@ importFileInput.addEventListener("change", async () => {
 });
 
 
-
 // Adds new note widget to dashboard and state
 addNoteBtn.addEventListener("click", () => {
     const newWidget = window.createNoteWidget();
     const newWidgetId = newWidget.id;
 
-    window.appState.widgets.push(newWidget);
-    saveState(window.appState);
-    CommandDashboard.render.renderApp(window.appState);
-
-    const selector = `textarea[data-widget-id="${newWidgetId}"]`;
-    const textareaToFocus = document.querySelector(selector);
-
-    if (textareaToFocus) {
-          CommandDashboard.render.autosizeTextarea(textareaToFocus);
-          textareaToFocus.focus();
-      }
+    applyAndRender(state => state.widgets.push(newWidget));
+    CommandDashboard.render.focusNote(newWidgetId);
 });
 
 // Deletes widgets
@@ -142,11 +138,9 @@ dashboard.addEventListener("click", (event) => {
     const widgetId = target.dataset.widgetId;
     if (!widgetId) return;
     
-    window.appState.widgets = window.appState.widgets
-                              .filter(arrayWidget => arrayWidget.id !== widgetId);
-    
-    saveState(window.appState);
-    CommandDashboard.render.renderApp(window.appState);
+    applyAndRender(state => {
+        state.widgets = state.widgets.filter(w => w.id !== widgetId);
+    });
 });
 
 // Deletes all widgets
@@ -156,11 +150,10 @@ clearNotesBtn.addEventListener("click", (event) => {
     const okayToClear = confirm("Clear all notes?");
     if (!okayToClear) return;
 
-    window.appState.widgets = window.appState.widgets.filter(arrayWidget => arrayWidget.type !== "note");
-
-    saveState(window.appState);
-    CommandDashboard.render.renderApp(window.appState);
-
+    applyAndRender(state => 
+        { state.widgets = state.widgets
+            .filter(arrayWidget => arrayWidget.type !== "note") 
+        });
 });
 
 // Debounce saving of note widget text
@@ -180,8 +173,6 @@ dashboard.addEventListener("input", (event) => {
     }
     widget.data ??= {};
     widget.data.text = target.value;
-
-    CommandDashboard.render.autosizeTextarea(target);
 
     if (saveTimerId !== null) {
         clearTimeout(saveTimerId);

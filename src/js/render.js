@@ -48,10 +48,29 @@ function _createNoteCard(widget) {
     noteCard.appendChild(header);
     noteCard.appendChild(textarea);
 
-    _autosizeTextarea(textarea);
-
-    return noteCard;
+    return { card: noteCard, textarea };
 }
+
+function _focusNote(widgetId) {
+    if (!_dashboard) return;
+    const note = _dashboard.querySelector(`textarea[data-widget-id="${widgetId}"]`);
+    if(note) note.focus();
+}
+
+function _wireAutosizeOnInput() {
+    if (!_dashboard) return;
+
+    _dashboard.addEventListener("input", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLTextAreaElement)) return;
+        if (!target.classList.contains("note-text")) return;
+    
+      _autosizeTextarea(target);
+  });
+}
+
+CommandDashboard.render.focusNote = _focusNote;
+CommandDashboard.render.wireAutosizeOnInput = _wireAutosizeOnInput;
 
 /**
  * Call once from app.js after you have the elements.
@@ -60,6 +79,8 @@ CommandDashboard.render.init = function initRender({ dashboard, headerTitle, cle
     _dashboard = dashboard;
     _headerTitle = headerTitle;
     _clearNotesBtn = clearNotesBtn;
+
+    _wireAutosizeOnInput();
 };
 
 /**
@@ -84,7 +105,10 @@ CommandDashboard.render.renderApp = function renderApp(state) {
 
   for (const widget of widgets) {
     if (widget.type === "note") {
-      _dashboard.appendChild(_createNoteCard(widget));
+      const { card, textarea } = _createNoteCard(widget);
+      _dashboard.appendChild(card);
+
+      _autosizeTextarea(textarea);
     }
   }
 };
