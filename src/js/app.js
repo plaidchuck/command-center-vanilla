@@ -6,24 +6,7 @@ if (!window.CommandDashboard?.dom) {
   throw new Error("CommandDashboard.dom not loaded. Check script order / namespace name.");
 }
 
-// Helpers
-
-function isValidAppState(state) {
-    return (
-        state &&
-        typeof state === "object" &&
-        typeof state.schemaVersion === "number" &&
-        Array.isArray(state.widgets)
-  );
-}
-
-function applyAndRender(mutatorFunction) {
-    mutatorFunction(window.appState);
-    saveState(window.appState);
-    CommandDashboard.render.renderApp(window.appState);
-}
-
-
+// Load static elements for the page(and also import file input to persist through for async reasons)
 const dashboard = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("dashboard"), HTMLElement, "#dashboard");
 const addNoteBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn");
 const headerTitle = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("headerTitle"), HTMLElement, "#headerTitle");
@@ -31,8 +14,6 @@ const clearNotesBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetEl
 const exportBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("exportBtn"), HTMLButtonElement, "#exportBtn");
 const importBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("importBtn"), HTMLButtonElement, "#importBtn");
 const importFileInput = CommandDashboard.io.getImportInput();
-
-let saveTimerId = null;
 
 const sessionState = loadState();
 if (sessionState && typeof sessionState === "object" && Array.isArray(sessionState.widgets)) {
@@ -50,160 +31,30 @@ CommandDashboard.render.init({
 
 // Listeners
 // Export to JSON button listener
-exportBtn.addEventListener("click", () => {
-    if (!isValidAppState(window.appState)) {
-        CommandDashboard.toast.show("Cannot export: application state is invalid.", "error");
-        return;
-    }
-  
-    if (window.appState.widgets.length === 0) {
-        const ok = confirm("There are no notes. Export anyway?");
-        if (!ok) return;
-    }
-
-    const filenamePrefix = "command-dashboard";
-
-    try {
-        const downloadFilename = CommandDashboard.io.exportStateToJson(window.appState, filenamePrefix);
-        CommandDashboard.toast.show(`Export: ${downloadFilename}`, "success");
-    } catch (error) {
-        console.error(error);
-        CommandDashboard.toast.show("Export failed. See console for details.", "error", 5000);
-    }
-});
+exportBtn.addEventListener("click", CommandDashboard.controllers.onExportClick);
 
 // Import button listener
-importBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-    CommandDashboard.io.openImportPicker();
-});
+importBtn.addEventListener("click", CommandDashboard.controllers.onImportClick);
 
 // File input listener
-importFileInput.addEventListener("change", async () => {
-    const file = importFileInput.files?.[0];
-    importFileInput.value = "";
-    if (!file) return;
-
-    try {
-        const text = await file.text();
-        const importedState = JSON.parse(text);
-
-    if (!isValidAppState(importedState)) {
-        CommandDashboard.toast.show("Invalid JSON file", "error", 5000);
-        return;
-    }
-
-    if (importedState.schemaVersion !== window.appState.schemaVersion) {
-        CommandDashboard.toast.show(
-            `Unsupported file version.\nExpected schema v${window.appState.schemaVersion}, got v${importedState.schemaVersion}.`,
-            "error", 5000);
-        return;
-    }
-
-    const ok = confirm("Import will replace your current notes. Continue?");
-    if (!ok) return;
-
-    window.appState = importedState;
-    saveState(window.appState);
-    (CommandDashboard.render.renderApp(window.appState));
-    
-    const widgetsSize = window.appState.widgets.length;
-    CommandDashboard.toast.show(`Imported ${widgetsSize} ${widgetsSize === 1 ? "note" : "notes"}`, "success");
-
-    } catch (err) {
-        console.error(err);
-        CommandDashboard.toast.show("Import failed (invalid file).", "error", 5000);
-    } finally {
-        importFileInput.value = "";
-    }
-});
-
+importFileInput.addEventListener("change", CommandDashboard.controllers.onImportFileChange);
 
 // Adds new note widget to dashboard and state
-addNoteBtn.addEventListener("click", () => {
-    const newWidget = window.createNoteWidget();
-    const newWidgetId = newWidget.id;
-
-    applyAndRender(state => state.widgets.push(newWidget));
-    CommandDashboard.render.focusNote(newWidgetId);
-});
+addNoteBtn.addEventListener("click", CommandDashboard.controllers.onAddNote);
 
 // Deletes widgets
-dashboard.addEventListener("click", (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLButtonElement)) return;
-    if (!target.classList.contains("note-delete")) return;
-    
-    event.preventDefault();
-    const widgetId = target.dataset.widgetId;
-    if (!widgetId) return;
-    
-    applyAndRender(state => {
-        state.widgets = state.widgets.filter(w => w.id !== widgetId);
-    });
-});
+dashboard.addEventListener("click", CommandDashboard.controllers.onDashboardClick);
 
 // Deletes all widgets
-clearNotesBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-
-    const okayToClear = confirm("Clear all notes?");
-    if (!okayToClear) return;
-
-    applyAndRender(state => 
-        { state.widgets = state.widgets
-            .filter(arrayWidget => arrayWidget.type !== "note") 
-        });
-});
+clearNotesBtn.addEventListener("click", CommandDashboard.controllers.onClearNotes);
 
 // Debounce saving of note widget text
-dashboard.addEventListener("input", (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLTextAreaElement)) return;
-    if (!target.classList.contains("note-text")) return;
-    
-    const widgetId = target.dataset.widgetId;
-    if (!widgetId) return;
-
-    const widget = window.appState.widgets
-                   .find(arrayWidget => arrayWidget.id === widgetId);
-
-    if (widget === undefined) {
-        return;
-    }
-    widget.data ??= {};
-    widget.data.text = target.value;
-
-    if (saveTimerId !== null) {
-        clearTimeout(saveTimerId);
-    }
-
-    saveTimerId = setTimeout(() => {
-        saveState(window.appState);
-        saveTimerId = null;
-    }, 250);
-});
+dashboard.addEventListener("input", CommandDashboard.controllers.onDashboardInput);
 
 // Change title or use default
-headerTitle.addEventListener("input", () => {
-  window.appState.title = headerTitle.textContent.trim() || "Command Dashboard";
+headerTitle.addEventListener("input", CommandDashboard.controllers.onTitleInput);
 
-  if (saveTimerId !== null) {
-    clearTimeout(saveTimerId);
-  }
-
-  saveTimerId = setTimeout(() => {
-    saveState(window.appState);
-    saveTimerId = null;
-  }, 250);
-});
-
-// prevent new line on title
-headerTitle.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    event.preventDefault();
-    headerTitle.blur();
-  }
-});
+// Prevent new line on title
+headerTitle.addEventListener("keydown", CommandDashboard.controllers.onTitleKeyDown);
 
 CommandDashboard.render.renderApp(window.appState);

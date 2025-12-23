@@ -1,0 +1,191 @@
+"use strict";
+window.CommandDashboard = window.CommandDashboard ?? {};
+CommandDashboard.controllers = CommandDashboard.controllers ?? {};
+console.log("Loaded controllers");
+
+// For debounce save in widgets
+let _saveTimerId = null;
+
+function _scheduleSave(delayMs = 250) {
+    if (_saveTimerId !== null) clearTimeout(_saveTimerId);
+
+    _saveTimerId = setTimeout(() => {
+        saveState(window.appState);
+        _saveTimerId = null;
+    }, delayMs);
+}
+
+
+function _isValidAppState(state) {
+    return (
+        state &&
+        typeof state === "object" &&
+        typeof state.schemaVersion === "number" &&
+        Array.isArray(state.widgets)
+  );
+}
+
+function _applyAndRender(mutatorFunction) {
+    mutatorFunction(window.appState);
+    saveState(window.appState);
+    CommandDashboard.render.renderApp(window.appState);
+}
+
+function _replaceStateAndRender(newState) {
+    window.appState = newState;
+    saveState(window.appState);
+    CommandDashboard.render.renderApp(window.appState);
+}
+
+CommandDashboard.controllers.onImportClick = function onImportClick(event) {
+    event.preventDefault();
+    CommandDashboard.io.openImportPicker();
+};
+
+CommandDashboard.controllers.onImportFileChange = async function onImportFileChange(event) {
+    const input = event.currentTarget;
+    if (!(input instanceof HTMLInputElement)) return;
+
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+
+    try {
+        const text = await file.text();
+        const importedState = JSON.parse(text);
+
+    if (!_isValidAppState(importedState)) {
+        CommandDashboard.toast.show("Invalid JSON file", "error", 5000);
+        return;
+    }
+
+    if (importedState.schemaVersion !== window.appState.schemaVersion) {
+        CommandDashboard.toast.show(
+            `Unsupported file version. Expected v${window.appState.schemaVersion}, got v${importedState.schemaVersion}.`,
+            "error",
+            5000
+        );
+        return;
+    }
+
+    const ok = confirm("Import will replace your current notes. Continue?");
+    if (!ok) return;
+
+    window.appState = importedState;
+    _replaceStateAndRender(appState);
+
+    const n = window.appState.widgets.length;
+    CommandDashboard.toast.show(`Imported ${n} ${n === 1 ? "note" : "notes"}`, "success");
+    
+    } catch (e) {
+        console.error(e);
+        CommandDashboard.toast.show("Import failed (invalid file).", "error", 5000);
+    }
+};
+
+CommandDashboard.controllers.onExportClick = function onExportClick(event) {
+    event.preventDefault();
+
+    const state = window.appState;
+
+    if (!_isValidAppState(state)) {
+        CommandDashboard.toast.show("Cannot export: application state is invalid.", "error");
+        return;
+    }
+
+    if (state.widgets.length === 0) {
+        const ok = confirm("There are no notes. Export anyway?");
+        if (!ok) return;
+    }
+
+    const filenamePrefix = "command-dashboard";
+
+    try {
+        const downloadFilename = CommandDashboard.io.exportStateToJson(window.appState, filenamePrefix);
+        CommandDashboard.toast.show(`Export: ${downloadFilename}`, "success");
+    } catch (error) {
+        console.error(error);
+        CommandDashboard.toast.show("Export failed. See console for details.", "error", 5000);
+    }
+};
+
+// Debounce to save dashboard/widget input
+CommandDashboard.controllers.onDashboardInput = function onDashboardInput(event) {
+    const target = event.target;
+    if (!(target instanceof HTMLTextAreaElement)) return;
+    if (!target.classList.contains("note-text")) return;
+
+    const widgetId = target.dataset.widgetId;
+    if (!widgetId) return;
+
+    const widget = window.appState.widgets.find(w => w.id === widgetId);
+    if (!widget) return;
+
+    widget.data ??= {};
+    widget.data.text = target.value;
+
+  // immediate UX
+    CommandDashboard.render.autosizeTextarea(target);
+
+  // delayed persistence
+    _scheduleSave(250);
+};
+
+CommandDashboard.controllers.onTitleInput = function onTitleInput (event) {
+    const headerTitle = event.currentTarget;
+    if (!(headerTitle instanceof HTMLElement)) return;
+    
+    window.appState.title = headerTitle.textContent.trim() || "Command Dashboard";
+    _scheduleSave(250);
+};
+
+// Keep title a single line
+CommandDashboard.controllers.onTitleKeyDown = function onTitleKeyDown(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        event.currentTarget.blur();
+    }
+};
+
+// Add widget
+CommandDashboard.controllers.onAddNote = function onAddNote() {
+    const newWidget = window.createNoteWidget();
+    const newId = newWidget.id;
+
+    _applyAndRender(function (state) {
+        state.widgets.push(newWidget);
+    });
+
+    CommandDashboard.render.focusNote(newId);
+};
+
+// Delete widget
+CommandDashboard.controllers.onDashboardClick = function onDashboardClick(event) {
+    const target = event.target;
+    if (!(target instanceof HTMLButtonElement)) return;
+    if (!target.classList.contains("note-delete")) return;
+    
+    event.preventDefault();
+    const widgetId = target.dataset.widgetId;
+    if (!widgetId) return;
+    
+    _applyAndRender(state => {
+        state.widgets = state.widgets.filter(w => w.id !== widgetId);
+    });
+}
+
+// Clear all widgets
+CommandDashboard.controllers.onClearNotes = function onClearNotes(event) {
+    event.preventDefault();
+
+    const ok = confirm("Clear all notes?");
+    if (!ok) return;
+
+    _applyAndRender(function (state) {
+        state.widgets = state.widgets.filter(w => w.type !== "note");
+    });
+};
+
+CommandDashboard.controllers.applyAndRender = _applyAndRender;
+CommandDashboard.controllers.isValidAppState = _isValidAppState;
+CommandDashboard.controllers.replaceStateAndRender = _replaceStateAndRender;
