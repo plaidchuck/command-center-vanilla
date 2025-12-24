@@ -168,10 +168,28 @@ CommandDashboard.controllers.onDashboardClick = function onDashboardClick(event)
     event.preventDefault();
     const widgetId = target.dataset.widgetId;
     if (!widgetId) return;
-    
+
+    const deleteIndex = window.appState.widgets.findIndex(w => w.id == widgetId);
+    if (deleteIndex === -1) return;
+
+    const deletedWidget = structuredClone(window.appState.widgets[deleteIndex]);
+
     _applyAndRender(state => {
-        state.widgets = state.widgets.filter(w => w.id !== widgetId);
+        state.widgets.splice(deleteIndex, 1);
     });
+
+    const undoAction = {
+        actionText: "Undo",
+        onAction: () => {
+            _applyAndRender(state => {
+                const i = Math.min(deleteIndex, state.widgets.length);
+                state.widgets.splice(i, 0, deletedWidget);
+            });
+            CommandDashboard.render.focusNote(deletedWidget.id);
+        }
+    }
+
+    CommandDashboard.toast.show("Note Deleted", "info", 5000, undoAction);
 }
 
 // Clear all widgets

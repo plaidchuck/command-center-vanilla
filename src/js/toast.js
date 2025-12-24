@@ -25,7 +25,13 @@ function _dismissToast(toastEl) {
   toastEl.addEventListener("animationend", () => toastEl.remove(), { once: true });
 }
 
-CommandDashboard.toast.show = function showToast(message, type = "info", durationMs = 3000) {
+CommandDashboard.toast.show = function showToast(
+      message,
+      type = "info",
+      durationMs = 3000,
+      options = null
+    ) {
+    
     if (!VALID_TYPES.has(type)) type = "info";
     
     const toast = document.createElement("div");
@@ -44,11 +50,28 @@ CommandDashboard.toast.show = function showToast(message, type = "info", duratio
         _dismissToast(toast);
     });
 
+    let actionBtn = null;
+
+    if (options?.actionText && typeof options.onAction === "function") {
+        actionBtn = document.createElement("button");
+        actionBtn.className = "toast-action";
+        actionBtn.type = "button";
+        actionBtn.textContent = options.actionText;
+
+        actionBtn.addEventListener("click", (event) => {
+            event.preventDefault();
+            options.onAction();
+            _dismissToast(toast);
+        });
+    }
+
     toast.appendChild(messageSpan);
+    if (actionBtn) toast.appendChild(actionBtn);
     toast.appendChild(closeBtn);
     toastHost.appendChild(toast);
 
-    toast._removeTimer = setTimeout(() => _dismissToast(toast), durationMs);
+    const ms = options?.sticky ? 999999 : durationMs;
+    toast._removeTimer = setTimeout(() => _dismissToast(toast), ms);
 
     if (toastHost.childElementCount > MAX_TOASTS) {
         _dismissToast(toastHost.children[0]);
