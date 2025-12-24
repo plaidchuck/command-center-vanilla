@@ -2,11 +2,12 @@
 window.CommandDashboard = window.CommandDashboard ?? {};
 console.log("app.js booting…");
 
-if (!window.CommandDashboard?.dom) {
-  throw new Error("CommandDashboard.dom not loaded. Check script order / namespace name.");
-}
+if (!CommandDashboard.dom) throw new Error("CommandDashboard.dom not loaded. Check script order / namespace name.");
+if (!CommandDashboard.controllers) throw new Error("controllers not loaded");
+if (!CommandDashboard.render) throw new Error("render not loaded");
+if (!CommandDashboard.io) throw new Error("io not loaded");
+if (!CommandDashboard.toast) throw new Error("toast not loaded");
 
-// Load static elements for the page(and also import file input to persist through for async reasons)
 const dashboard = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("dashboard"), HTMLElement, "#dashboard");
 const addNoteBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn");
 const headerTitle = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("headerTitle"), HTMLElement, "#headerTitle");
@@ -17,6 +18,8 @@ const importFileInput = CommandDashboard.io.getImportInput();
 
 const sessionState = loadState();
 if (sessionState && typeof sessionState === "object" && Array.isArray(sessionState.widgets)) {
+    if (!window.appState) throw new Error("window.appState missing. Check that state.js is loaded before app.js.");
+
     window.appState = sessionState;
     console.log("Initial state loaded successfully");
 }
