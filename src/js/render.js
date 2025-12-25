@@ -31,6 +31,14 @@ function _createNoteCard(widget) {
     const header = document.createElement("div");
     header.className = "note-card-header";
 
+    const pinBtn = document.createElement("button");
+    pinBtn.className = "note-pin"
+    pinBtn.type = "button";
+    pinBtn.textContent = "📌";
+    pinBtn.dataset.widgetId = widget.id;
+
+    header.appendChild(pinBtn);
+
     const delBtn = document.createElement("button");
     delBtn.className = "note-delete";
     delBtn.type = "button";
