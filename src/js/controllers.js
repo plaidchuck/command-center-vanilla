@@ -159,7 +159,7 @@ CommandDashboard.controllers.onAddNote = function onAddNote() {
     CommandDashboard.render.focusNote(newId);
 };
 
-// Delete widget
+// Delete widget with undo button option
 CommandDashboard.controllers.onDashboardClick = function onDashboardClick(event) {
     const target = event.target;
     if (!(target instanceof HTMLButtonElement)) return;
@@ -199,9 +199,21 @@ CommandDashboard.controllers.onClearNotes = function onClearNotes(event) {
     const ok = confirm("Clear all notes?");
     if (!ok) return;
 
+    const widgetsBeforeClear = window.appState.widgets.slice();
+
     _applyAndRender(function (state) {
         state.widgets = state.widgets.filter(w => w.type !== "note");
     });
+
+    const undoAction = {
+        actionText: "Undo",
+        onAction: () => {
+            _applyAndRender(state => {
+                state.widgets = widgetsBeforeClear.slice();
+            });
+        }
+    }
+    CommandDashboard.toast.show("All Notes Deleted", "info", 5000, undoAction);
 };
 
 CommandDashboard.controllers.applyAndRender = _applyAndRender;
