@@ -27,15 +27,31 @@ function _createEmptyMessage() {
 function _createNoteCard(widget) {
     const noteCard = document.createElement("div");
     noteCard.className = "note-card";
+    
+    // Pinned or not, false if null
+    const pinned = !!widget.data?.pinned;
+    if (pinned) noteCard.classList.add("is-pinned");
 
     const header = document.createElement("div");
     header.className = "note-card-header";
+
+    const pinBtn = document.createElement("button");
+    pinBtn.className = "note-pin"
+    pinBtn.type = "button";
+    pinBtn.textContent = pinned ? "📍" : "📌";
+    pinBtn.title = pinned ? "Unpin note" : "Pin note";
+    pinBtn.dataset.widgetId = widget.id;
+    pinBtn.dataset.action = widget.data?.pinned ? "note-unpin" : "note-pin";
+
+    header.appendChild(pinBtn);
 
     const delBtn = document.createElement("button");
     delBtn.className = "note-delete";
     delBtn.type = "button";
     delBtn.textContent = "✕";
+    delBtn.title = "Delete note";
     delBtn.dataset.widgetId = widget.id;
+    delBtn.dataset.action = "note-delete";
 
     header.appendChild(delBtn);
 

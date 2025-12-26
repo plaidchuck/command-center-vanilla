@@ -45,7 +45,7 @@ importFileInput.addEventListener("change", CommandDashboard.controllers.onImport
 // Adds new note widget to dashboard and state
 addNoteBtn.addEventListener("click", CommandDashboard.controllers.onAddNote);
 
-// Deletes widgets
+// Dispatch for any click button actions within dashboard(currently delete widget/pin widget)
 dashboard.addEventListener("click", CommandDashboard.controllers.onDashboardClick);
 
 // Deletes all widgets

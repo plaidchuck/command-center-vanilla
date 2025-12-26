@@ -159,38 +159,25 @@ CommandDashboard.controllers.onAddNote = function onAddNote() {
     CommandDashboard.render.focusNote(newId);
 };
 
-// Delete widget with undo button option
+// Widget button action dispatcher
 CommandDashboard.controllers.onDashboardClick = function onDashboardClick(event) {
-    const target = event.target;
-    if (!(target instanceof HTMLButtonElement)) return;
-    if (!target.classList.contains("note-delete")) return;
+    const btn = event.target.closest("button");
+    if (!btn) return;
+
+    const action = btn.dataset.action;
+    if (!action) return;
     
+    const widgetId = btn.dataset.widgetId;
     event.preventDefault();
-    const widgetId = target.dataset.widgetId;
-    if (!widgetId) return;
 
-    const deleteIndex = window.appState.widgets.findIndex(w => w.id == widgetId);
-    if (deleteIndex === -1) return;
-
-    const deletedWidget = structuredClone(window.appState.widgets[deleteIndex]);
-
-    _applyAndRender(state => {
-        state.widgets.splice(deleteIndex, 1);
-    });
-
-    const undoAction = {
-        actionText: "Undo",
-        onAction: () => {
-            _applyAndRender(state => {
-                const i = Math.min(deleteIndex, state.widgets.length);
-                state.widgets.splice(i, 0, deletedWidget);
-            });
-            CommandDashboard.render.focusNote(deletedWidget.id);
-        }
+    const handler = CommandDashboard.handlers?.[action];
+    if (typeof handler !== "function") {
+        console.warn("No handler registered for action:", action);
+        return;
     }
 
-    CommandDashboard.toast.show("Note Deleted", "info", 5000, undoAction);
-}
+    handler({ widgetId, event, button: btn});
+};
 
 // Clear all widgets
 CommandDashboard.controllers.onClearNotes = function onClearNotes(event) {

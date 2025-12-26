@@ -99,6 +99,7 @@ body {
   margin-bottom: 0.75rem;
   background: #d8c7c7;
   border: 1px solid #000000;
+  border-radius: 10px;
   position: relative;
 }
 
@@ -130,6 +131,41 @@ body {
   background: transparent;
   cursor: pointer;
 }
+
+@keyframes pin-pop {
+  from { transform: scale(0.98); }
+  to   { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note-card.is-pinned {
+    animation: none;
+  }
+}
+
+.note-card.is-pinned {
+  border-left: 4px solid #40f430; /* warm pin color */
+  background: #3e9e21;
+  border: 0px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  animation: pin-pop 120ms ease-out;
+}
+
+.note-pin {
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.note-card.is-pinned .note-pin {
+  opacity: 1;
+}
+
+.note-pin:hover {
+  opacity: 1;
+}
+
 
 /* Export/Import toast */
 #toastHost {

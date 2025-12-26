@@ -13,7 +13,8 @@ window.createNoteWidget = function () {
         id: newId,
         type: newType,
         data: {
-            text: newText
+            text: newText,
+            pinned: false
         }
     }
 }
