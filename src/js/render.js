@@ -27,12 +27,13 @@ function _createEmptyMessage() {
 function _createNoteCard(widget) {
     const noteCard = document.createElement("div");
     noteCard.className = "note-card";
+    
+    // Pinned or not, false if null
+    const pinned = !!widget.data?.pinned;
+    if (pinned) noteCard.classList.add("is-pinned");
 
     const header = document.createElement("div");
     header.className = "note-card-header";
-
-    // Pinned or not, false if null
-    const pinned = !!widget.data?.pinned;
 
     const pinBtn = document.createElement("button");
     pinBtn.className = "note-pin"

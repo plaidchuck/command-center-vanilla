@@ -54,7 +54,8 @@ CommandDashboard.handlers["note-pin"] = function notePinHandler({ widgetId }) {
     });
     
     CommandDashboard.render.focusNote(widgetId);
-}
+};
+
 CommandDashboard.handlers["note-unpin"] = function noteUnpinHandler({ widgetId}) {
     if (!widgetId) return;
 
