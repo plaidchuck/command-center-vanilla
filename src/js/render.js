@@ -31,11 +31,16 @@ function _createNoteCard(widget) {
     const header = document.createElement("div");
     header.className = "note-card-header";
 
+    // Pinned or not, false if null
+    const pinned = !!widget.data?.pinned;
+
     const pinBtn = document.createElement("button");
     pinBtn.className = "note-pin"
     pinBtn.type = "button";
-    pinBtn.textContent = "📌";
+    pinBtn.textContent = pinned ? "📍" : "📌";
+    pinBtn.title = pinned ? "Unpin note" : "Pin note";
     pinBtn.dataset.widgetId = widget.id;
+    pinBtn.dataset.action = widget.data?.pinned ? "note-unpin" : "note-pin";
 
     header.appendChild(pinBtn);
 
@@ -43,7 +48,9 @@ function _createNoteCard(widget) {
     delBtn.className = "note-delete";
     delBtn.type = "button";
     delBtn.textContent = "✕";
+    delBtn.title = "Delete note";
     delBtn.dataset.widgetId = widget.id;
+    delBtn.dataset.action = "note-delete";
 
     header.appendChild(delBtn);
 
