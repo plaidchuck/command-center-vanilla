@@ -3,39 +3,6 @@ window.CommandDashboard = window.CommandDashboard ?? {};
 CommandDashboard.controllers = CommandDashboard.controllers ?? {};
 console.log("Loaded controllers");
 
-// For debounce save in widgets
-let _saveTimerId = null;
-
-function _scheduleSave(delayMs = 250) {
-    if (_saveTimerId !== null) clearTimeout(_saveTimerId);
-
-    _saveTimerId = setTimeout(() => {
-        saveState(window.appState);
-        _saveTimerId = null;
-    }, delayMs);
-}
-
-
-function _isValidAppState(state) {
-    return (
-        state &&
-        typeof state === "object" &&
-        typeof state.schemaVersion === "number" &&
-        Array.isArray(state.widgets)
-  );
-}
-
-function _applyAndRender(mutatorFunction) {
-    mutatorFunction(window.appState);
-    saveState(window.appState);
-    CommandDashboard.render.renderApp(window.appState);
-}
-
-function _replaceStateAndRender(newState) {
-    window.appState = newState;
-    saveState(window.appState);
-    CommandDashboard.render.renderApp(window.appState);
-}
 
 CommandDashboard.controllers.onImportClick = function onImportClick(event) {
     event.preventDefault();
@@ -54,7 +21,7 @@ CommandDashboard.controllers.onImportFileChange = async function onImportFileCha
         const text = await file.text();
         const importedState = JSON.parse(text);
 
-    if (!_isValidAppState(importedState)) {
+    if (!CommandDashboard.store.isValidState(importedState)) {
         CommandDashboard.toast.show("Invalid JSON file", "error", 5000);
         return;
     }
@@ -71,8 +38,7 @@ CommandDashboard.controllers.onImportFileChange = async function onImportFileCha
     const ok = confirm("Import will replace your current notes. Continue?");
     if (!ok) return;
 
-    window.appState = importedState;
-    _replaceStateAndRender(appState);
+    CommandDashboard.store.replace(importedState);
 
     const n = window.appState.widgets.length;
     CommandDashboard.toast.show(`Imported ${n} ${n === 1 ? "note" : "notes"}`, "success");
@@ -88,7 +54,7 @@ CommandDashboard.controllers.onExportClick = function onExportClick(event) {
 
     const state = window.appState;
 
-    if (!_isValidAppState(state)) {
+    if (CommandDashboard.store.isValidState(state)) {
         CommandDashboard.toast.show("Cannot export: application state is invalid.", "error");
         return;
     }
@@ -128,7 +94,7 @@ CommandDashboard.controllers.onDashboardInput = function onDashboardInput(event)
     CommandDashboard.render.autosizeTextarea(target);
 
   // delayed persistence
-    _scheduleSave(250);
+    CommandDashboard.store.scheduleSave(250);
 };
 
 CommandDashboard.controllers.onTitleInput = function onTitleInput (event) {
@@ -136,7 +102,7 @@ CommandDashboard.controllers.onTitleInput = function onTitleInput (event) {
     if (!(headerTitle instanceof HTMLElement)) return;
     
     window.appState.title = headerTitle.textContent.trim() || "Command Dashboard";
-    _scheduleSave(250);
+    CommandDashboard.store.scheduleSave(250);
 };
 
 // Keep title a single line
@@ -152,7 +118,7 @@ CommandDashboard.controllers.onAddNote = function onAddNote() {
     const newWidget = window.createNoteWidget();
     const newId = newWidget.id;
 
-    _applyAndRender(function (state) {
+    CommandDashboard.store.apply(function (state) {
         state.widgets.push(newWidget);
     });
 
@@ -188,21 +154,17 @@ CommandDashboard.controllers.onClearNotes = function onClearNotes(event) {
 
     const widgetsBeforeClear = window.appState.widgets.slice();
 
-    _applyAndRender(function (state) {
+    CommandDashboard.store.apply(function (state) {
         state.widgets = state.widgets.filter(w => w.type !== "note");
     });
 
     const undoAction = {
         actionText: "Undo",
         onAction: () => {
-            _applyAndRender(state => {
+            CommandDashboard.store.apply(state => {
                 state.widgets = widgetsBeforeClear.slice();
             });
         }
     }
     CommandDashboard.toast.show("All Notes Deleted", "info", 5000, undoAction);
 };
-
-CommandDashboard.controllers.applyAndRender = _applyAndRender;
-CommandDashboard.controllers.isValidAppState = _isValidAppState;
-CommandDashboard.controllers.replaceStateAndRender = _replaceStateAndRender;

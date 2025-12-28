@@ -3,10 +3,13 @@ window.CommandDashboard = window.CommandDashboard ?? {};
 console.log("app.js booting…");
 
 if (!CommandDashboard.dom) throw new Error("CommandDashboard.dom not loaded. Check script order / namespace name.");
+if (!CommandDashboard.storage) throw new Error("Persistence storage not loaded");
 if (!CommandDashboard.controllers) throw new Error("controllers not loaded");
+if (!CommandDashboard.handlers) throw new ("handlers not loaded");
 if (!CommandDashboard.render) throw new Error("render not loaded");
-if (!CommandDashboard.io) throw new Error("io not loaded");
+if (!CommandDashboard.io) throw new Error("i/o not loaded");
 if (!CommandDashboard.toast) throw new Error("toast not loaded");
+if (!CommandDashboard.store) throw new Error("store not loaded");
 
 const dashboard = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("dashboard"), HTMLElement, "#dashboard");
 const addNoteBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn");
@@ -16,21 +19,23 @@ const exportBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElemen
 const importBtn = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("importBtn"), HTMLButtonElement, "#importBtn");
 const importFileInput = CommandDashboard.io.getImportInput();
 
-const sessionState = loadState();
-if (sessionState && typeof sessionState === "object" && Array.isArray(sessionState.widgets)) {
-    if (!window.appState) throw new Error("window.appState missing. Check that state.js is loaded before app.js.");
-
-    window.appState = sessionState;
-    console.log("Initial state loaded successfully");
-}
-
 // Load render.js with main non widget elements
 
 CommandDashboard.render.init({
     dashboard,
     headerTitle,
     clearNotesBtn
-})
+});
+
+// Inject store with persistence load, save and render functionality
+
+CommandDashboard.store.init({
+    load: CommandDashboard.storage.loadState,
+    save: CommandDashboard.storage.saveState,
+    render: CommandDashboard.render.renderApp
+});
+
+CommandDashboard.store.hydrateFromStorage();
 
 // Listeners
 // Export to JSON button listener

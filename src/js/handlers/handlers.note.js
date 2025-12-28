@@ -11,7 +11,7 @@ CommandDashboard.handlers["note-delete"] = function noteDeleteHandler({ widgetId
 
     deletedWidget = structuredClone(window.appState.widgets[deleteIndex]);
 
-    CommandDashboard.controllers.applyAndRender(state => {
+    CommandDashboard.store.apply(state => {
         deleteIndex = state.widgets.findIndex(w => w.id === widgetId);
         if (deleteIndex === -1) return;
 
@@ -24,7 +24,7 @@ CommandDashboard.handlers["note-delete"] = function noteDeleteHandler({ widgetId
   const undoAction = {
     actionText: "Undo",
     onAction: () => {
-      CommandDashboard.controllers.applyAndRender(state => {
+      CommandDashboard.store.apply(state => {
         const i = Math.min(deleteIndex, state.widgets.length);
         state.widgets.splice(i, 0, deletedWidget);
       });
@@ -38,7 +38,7 @@ CommandDashboard.handlers["note-delete"] = function noteDeleteHandler({ widgetId
 CommandDashboard.handlers["note-pin"] = function notePinHandler({ widgetId }) {
     if (!widgetId) return;
     
-    CommandDashboard.controllers.applyAndRender(state => {
+    CommandDashboard.store.apply(state => {
         const fromIndex = state.widgets.findIndex(w => w.id === widgetId);
         if (fromIndex === -1) return;
 
@@ -59,7 +59,7 @@ CommandDashboard.handlers["note-pin"] = function notePinHandler({ widgetId }) {
 CommandDashboard.handlers["note-unpin"] = function noteUnpinHandler({ widgetId}) {
     if (!widgetId) return;
 
-    CommandDashboard.controllers.applyAndRender(state => {
+    CommandDashboard.store.apply(state => {
         const fromIndex = state.widgets.findIndex(w => w.id === widgetId);
         if (fromIndex === -1) return;
 

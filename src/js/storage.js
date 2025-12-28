@@ -1,7 +1,12 @@
 // storage.js
+"use strict";
+window.CommandDashboard = window.CommandDashboard ?? {};
+CommandDashboard.storage = CommandDashboard.storage ?? {};
+console.log("Loaded storage");
+
 const STORAGE_KEY = "command-dashboard-state";
 
-function loadState() {
+CommandDashboard.storage.loadState = function loadState() {
     const serializedSavedState = localStorage.getItem(STORAGE_KEY);
     if (serializedSavedState === null) {
         return null;
@@ -18,7 +23,7 @@ function loadState() {
     }
 }
 
-function saveState(state) {
+CommandDashboard.storage.saveState = function saveState(state) {
     const savedState = JSON.stringify(state);
     localStorage.setItem(STORAGE_KEY, savedState);
 }
