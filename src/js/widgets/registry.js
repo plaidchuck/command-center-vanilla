@@ -28,3 +28,7 @@ CommandDashboard.widgets.renderWidget = function renderWidget(widget) {
 
     return api.render(widget);
 }
+
+CommandDashboard.widgets.get = function get(type) {
+    return _renderersByType.get(type) ?? null;
+};

@@ -115,14 +115,14 @@ CommandDashboard.controllers.onTitleKeyDown = function onTitleKeyDown(event) {
 
 // Add widget
 CommandDashboard.controllers.onAddNote = function onAddNote() {
-    const newWidget = window.createNoteWidget();
-    const newId = newWidget.id;
+    const noteApi = CommandDashboard.widgets.get?.("note");
+    const newWidget = noteApi.create();
 
-    CommandDashboard.store.apply(function (state) {
+    CommandDashboard.store.apply(state => {
         state.widgets.push(newWidget);
     });
 
-    CommandDashboard.render.focusNote(newId);
+    CommandDashboard.render.focusNote(newWidget.id);
 };
 
 // Widget button action dispatcher

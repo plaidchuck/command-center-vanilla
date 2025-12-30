@@ -46,5 +46,10 @@ function _createNoteCard(widget) {
 }
 
 CommandDashboard.widgets.register("note", {
+    create: () => ({
+        id: "w_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        type: "note",
+        data: { text: "", pinned: false }
+    }),
     render: (widget) => _createNoteCard(widget),
 });
