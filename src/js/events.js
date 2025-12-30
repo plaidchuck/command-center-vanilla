@@ -1,0 +1,22 @@
+"use strict";
+window.CommandDashboard = window.CommandDashboard ?? {};
+CommandDashboard.events = CommandDashboard.events ?? {};
+console.log("Loaded event listeners");
+
+CommandDashboard.events.bind = function bindEvents(ui) {
+    const controllers = CommandDashboard.controllers;
+
+    ui.exportBtn.addEventListener("click", controllers.onExportClick);
+    ui.importBtn.addEventListener("click", controllers.onImportClick);
+    ui.importFileInput.addEventListener("change", controllers.onImportFileChange);
+
+    ui.addNoteBtn.addEventListener("click", controllers.onAddNote);
+
+    ui.dashboard.addEventListener("click", controllers.onDashboardClick);
+    ui.dashboard.addEventListener("input", controllers.onDashboardInput);
+
+    ui.clearNotesBtn.addEventListener("click", controllers.onClearNotes);
+
+    ui.headerTitle.addEventListener("input", controllers.onTitleInput);
+    ui.headerTitle.addEventListener("keydown", controllers.onTitleKeyDown);
+};

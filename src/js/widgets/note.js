@@ -1,3 +1,4 @@
+"use strict";
 CommandDashboard.window = CommandDashboard.window ?? {};
 CommandDashboard.widgets = CommandDashboard.widgets ?? {};
 console.log("note widget registry loaded");
