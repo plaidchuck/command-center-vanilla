@@ -54,7 +54,7 @@ CommandDashboard.controllers.onExportClick = function onExportClick(event) {
 
     const state = window.appState;
 
-    if (CommandDashboard.store.isValidState(state)) {
+    if (!CommandDashboard.store.isValidState(state)) {
         CommandDashboard.toast.show("Cannot export: application state is invalid.", "error");
         return;
     }

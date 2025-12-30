@@ -1,6 +1,6 @@
 // state.js
 window.appState = {
-    title: "Command Dashboard",
+    title: "Name your Dashboard:",
     schemaVersion: 1,
     widgets: []
 };
