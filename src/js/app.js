@@ -21,7 +21,12 @@ const ui = {
     importFileInput: CommandDashboard.io.getImportInput()
 }
 
-// Load render.js with main non widget elements
+// Load render.js with header elements
+const {
+    dashboard,
+    headerTitle,
+    clearNotesBtn
+} = ui;
 
 CommandDashboard.render.init({
     dashboard,

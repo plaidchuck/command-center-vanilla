@@ -43,13 +43,12 @@ CommandDashboard.handlers["note-pin"] = function notePinHandler({ widgetId }) {
         if (fromIndex === -1) return;
 
         const noteWidget = state.widgets[fromIndex];
-        noteWidget.data ??= {};
 
-        if (noteWidget.data.pinned) return;
+        if (CommandDashboard.widgets.meta.getPinned(noteWidget)) return;
 
         state.widgets.splice(fromIndex, 1);
 
-        noteWidget.data.pinned = true;
+        CommandDashboard.widgets.meta.setPinned(noteWidget, true);
         state.widgets.splice(0, 0, noteWidget);
     });
     
@@ -64,19 +63,18 @@ CommandDashboard.handlers["note-unpin"] = function noteUnpinHandler({ widgetId})
         if (fromIndex === -1) return;
 
         const noteWidget = state.widgets[fromIndex];
-        noteWidget.data ??= {};
 
-        if (!noteWidget.data.pinned) return;
+        if (!CommandDashboard.widgets.meta.getPinned(noteWidget)) return;
 
         state.widgets.splice(fromIndex, 1);
 
         let insertIndex = 0;
         while (insertIndex < state.widgets.length) {
             const widget = state.widgets[insertIndex];
-            if (!widget.data?.pinned) break;
+            if (!CommandDashboard.widgets.meta.getPinned(widget)) break;
             insertIndex++;
         }
-        noteWidget.data.pinned = false;
+        CommandDashboard.widgets.meta.setPinned(noteWidget, false);
 
         state.widgets.splice(insertIndex, 0, noteWidget);
     });

@@ -1,5 +1,5 @@
 "use strict";
-CommandDashboard.window = CommandDashboard.window ?? {};
+window.CommandDashboard = window.CommandDashboard ?? {};
 CommandDashboard.widgets = CommandDashboard.widgets ?? {};
 console.log("note widget registry loaded");
 
@@ -8,7 +8,7 @@ function _createNoteCard(widget) {
     noteCard.className = "note-card";
     
     // Pinned or not, false if null
-    const pinned = !!widget.data?.pinned;
+    const pinned = CommandDashboard.widgets.meta.getPinned(widget);
     if (pinned) noteCard.classList.add("is-pinned");
 
     const header = document.createElement("div");
@@ -20,7 +20,7 @@ function _createNoteCard(widget) {
     pinBtn.textContent = pinned ? "📍" : "📌";
     pinBtn.title = pinned ? "Unpin note" : "Pin note";
     pinBtn.dataset.widgetId = widget.id;
-    pinBtn.dataset.action = widget.data?.pinned ? "note-unpin" : "note-pin";
+    pinBtn.dataset.action = pinned ? "note-unpin" : "note-pin";
 
     header.appendChild(pinBtn);
 
@@ -50,7 +50,8 @@ CommandDashboard.widgets.register("note", {
     create: () => ({
         id: "w_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
         type: "note",
-        data: { text: "", pinned: false }
+        data: { text: "" },
+        meta: { pinned: false }
     }),
     render: (widget) => _createNoteCard(widget),
 });

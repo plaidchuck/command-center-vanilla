@@ -17,17 +17,31 @@ CommandDashboard.store.init = function initStore({load, save, render}) {
 };
 
 CommandDashboard.store.hydrateFromStorage = function hydrateFromStorage() {
-    if (typeof _load !== "function" || typeof _save !== "function" || typeof _render !== "function") {
-        throw new Error("store.init(...) not called");
-    }
-    
-    const loadedStorage = _load();
+  if (typeof _load !== "function" || typeof _save !== "function" || typeof _render !== "function") {
+    throw new Error("store.init(...) not called");
+  }
 
-    if (CommandDashboard.store.isValidState(loadedStorage)) {
-        window.appState = loadedStorage;
-        return true;
+  const loadedStorage = _load();
+  if (!CommandDashboard.store.isValidState(loadedStorage)) return false;
+
+  window.appState = loadedStorage;
+
+  let didMutate = false;
+
+  for (const widget of window.appState.widgets) {
+    CommandDashboard.widgets.meta.ensureMeta(widget);
+    CommandDashboard.widgets.meta.ensureCreatedAt(widget);
+
+    if (widget?.data && Object.prototype.hasOwnProperty.call(widget.data, "pinned")) {
+      CommandDashboard.widgets.meta.setPinned(widget, !!widget.data.pinned);
+      delete widget.data.pinned;
+      didMutate = true;
     }
-    return false;
+  }
+
+  if (didMutate) _save(window.appState);
+
+  return true;
 };
 
 CommandDashboard.store.getState = function getState() {
@@ -73,5 +87,5 @@ CommandDashboard.store.isValidState = function isValidState(state) {
     if (typeof state.schemaVersion !== "number") return false;
     if (typeof state.title !== "string") return false;
     if (!Array.isArray(state.widgets)) return false;
-  return true;
+    return true;
 };
