@@ -17,31 +17,31 @@ CommandDashboard.store.init = function initStore({load, save, render}) {
 };
 
 CommandDashboard.store.hydrateFromStorage = function hydrateFromStorage() {
-  if (typeof _load !== "function" || typeof _save !== "function" || typeof _render !== "function") {
-    throw new Error("store.init(...) not called");
-  }
+    if (typeof _load !== "function" || typeof _save !== "function" || typeof _render !== "function") {
+        throw new Error("store.init(...) not called");
+    }
 
-  const loadedStorage = _load();
-  if (!CommandDashboard.store.isValidState(loadedStorage)) return false;
+    const loadedStorage = _load();
+    if (!CommandDashboard.store.isValidState(loadedStorage)) return false;
 
-  window.appState = loadedStorage;
+    window.appState = loadedStorage;
 
-  let didMutate = false;
+    let didMutate = false;
 
-  for (const widget of window.appState.widgets) {
-    CommandDashboard.widgets.meta.ensureMeta(widget);
-    CommandDashboard.widgets.meta.ensureCreatedAt(widget);
+    for (const widget of window.appState.widgets) {
+        CommandDashboard.widgets.meta.ensureMeta(widget);
+        CommandDashboard.widgets.meta.ensureCreatedAt(widget);
 
-    if (widget?.data && Object.prototype.hasOwnProperty.call(widget.data, "pinned")) {
-      CommandDashboard.widgets.meta.setPinned(widget, !!widget.data.pinned);
-      delete widget.data.pinned;
-      didMutate = true;
+        if (widget?.data && Object.prototype.hasOwnProperty.call(widget.data, "pinned")) {
+            CommandDashboard.widgets.meta.setPinned(widget, !!widget.data.pinned);
+            delete widget.data.pinned;
+            didMutate = true;
     }
   }
 
-  if (didMutate) _save(window.appState);
+    if (didMutate) _save(window.appState);
 
-  return true;
+    return true;
 };
 
 CommandDashboard.store.getState = function getState() {
