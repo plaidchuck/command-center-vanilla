@@ -83,7 +83,7 @@ CommandDashboard.render.renderApp = function renderApp(state) {
         _dashboard.appendChild(widgetElement);
         const textarea = widgetElement.querySelector?.("textarea.note-text");
 
-        _autosizeTextarea(textarea);
+        if (textarea) _autosizeTextarea(textarea);
     }
 };
 

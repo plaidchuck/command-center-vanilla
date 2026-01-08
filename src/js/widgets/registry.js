@@ -25,8 +25,16 @@ CommandDashboard.widgets.renderWidget = function renderWidget(widget) {
         console.warn("No widget registered for type:", type, widget);
         return null;
     }
+    const content = api.render(widget);
+    if (!content) return null;
 
-    return api.render(widget);
+    const chrome = CommandDashboard.widgets.chrome?.create;
+    if (typeof chrome !== "function") return content;
+
+    const { outer, body } = chrome(widget);
+    if (body && content) body.appendChild(content);
+
+    return outer ?? content;
 }
 
 CommandDashboard.widgets.get = function get(type) {

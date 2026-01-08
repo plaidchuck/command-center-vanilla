@@ -14,6 +14,8 @@ CommandDashboard.events.bind = function bindEvents(ui) {
 
     ui.dashboard.addEventListener("click", controllers.onDashboardClick);
     ui.dashboard.addEventListener("input", controllers.onDashboardInput);
+    ui.dashboard.addEventListener("keydown", controllers.onWidgetTitleKeyDown);
+    ui.dashboard.addEventListener("focusout", controllers.onWidgetTitleFocusOut);
 
     ui.clearNotesBtn.addEventListener("click", controllers.onClearNotes);
 
