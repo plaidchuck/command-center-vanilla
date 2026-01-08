@@ -3,6 +3,12 @@ window.CommandDashboard = window.CommandDashboard ?? {};
 CommandDashboard.widgets = CommandDashboard.widgets ?? {};
 console.log("note widget registry loaded");
 
+function _autosizeTextarea(textarea) {
+    if (!(textarea instanceof HTMLTextAreaElement)) return;
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+}
+
 function _createNoteCard(widget) {
     const noteCard = document.createElement("div");
     noteCard.className = "note-card";
@@ -39,6 +45,7 @@ function _createNoteCard(widget) {
     textarea.value = widget.data?.text ?? "";
     textarea.placeholder = "Write something ...";
     textarea.dataset.widgetId = widget.id;
+    _autosizeTextarea(textarea);
 
     noteCard.appendChild(header);
     noteCard.appendChild(textarea);
@@ -54,4 +61,5 @@ CommandDashboard.widgets.register("note", {
         meta: { pinned: false }
     }),
     render: (widget) => _createNoteCard(widget),
+    autosizeTextarea: _autosizeTextarea,
 });

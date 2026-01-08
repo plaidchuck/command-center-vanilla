@@ -12,11 +12,6 @@ let _dashboard = null;
 let _headerTitle = null;
 let _clearNotesBtn = null;
 
-function _autosizeTextarea(textarea) {
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-}
-
 function _createEmptyMessage() {
     const msg = document.createElement("div");
     msg.textContent = "No widgets yet — click + Note to add one.";
@@ -30,20 +25,7 @@ function _focusNote(widgetId) {
     if(note) note.focus();
 }
 
-function _wireAutosizeOnInput() {
-    if (!_dashboard) return;
-
-    _dashboard.addEventListener("input", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLTextAreaElement)) return;
-        if (!target.classList.contains("note-text")) return;
-    
-      _autosizeTextarea(target);
-  });
-}
-
 CommandDashboard.render.focusNote = _focusNote;
-CommandDashboard.render.wireAutosizeOnInput = _wireAutosizeOnInput;
 
 /**
  * Call once from app.js after you have the elements.
@@ -53,7 +35,6 @@ CommandDashboard.render.init = function initRender({ dashboard, headerTitle, cle
     _headerTitle = headerTitle;
     _clearNotesBtn = clearNotesBtn;
 
-    _wireAutosizeOnInput();
 };
 
 /**
@@ -81,10 +62,5 @@ CommandDashboard.render.renderApp = function renderApp(state) {
         if (!widgetElement) continue;
     
         _dashboard.appendChild(widgetElement);
-        const textarea = widgetElement.querySelector?.("textarea.note-text");
-
-        _autosizeTextarea(textarea);
     }
 };
-
-CommandDashboard.render.autosizeTextarea = _autosizeTextarea;

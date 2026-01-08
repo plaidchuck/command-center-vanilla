@@ -90,10 +90,11 @@ CommandDashboard.controllers.onDashboardInput = function onDashboardInput(event)
     widget.data ??= {};
     widget.data.text = target.value;
 
-  // immediate UX
-    CommandDashboard.render.autosizeTextarea(target);
+    // immediate UX
+    const noteApi = CommandDashboard.widgets.get?.("note");
+    noteApi?.autosizeTextarea?.(target);
 
-  // delayed persistence
+    // delayed persistence
     CommandDashboard.store.scheduleSave(250);
 };
 
