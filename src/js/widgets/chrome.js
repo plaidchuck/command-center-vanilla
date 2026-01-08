@@ -12,6 +12,8 @@ function _createHeader(widget) {
     const title = document.createElement("div");
     title.className = "widget-title";
     title.contentEditable = "true";
+    title.setAttribute("data-placeholder", "Untitled");
+    title.setAttribute("spellcheck", "false");
     title.dataset.widgetId = widget.id;
     title.dataset.action = "widget-title";
     title.textContent = CommandDashboard.widgets.meta?.getTitle

@@ -78,8 +78,26 @@ CommandDashboard.controllers.onExportClick = function onExportClick(event) {
 // Debounce to save dashboard/widget input
 CommandDashboard.controllers.onDashboardInput = function onDashboardInput(event) {
     const target = event.target;
-    if (!(target instanceof HTMLTextAreaElement)) return;
-    if (!target.classList.contains("note-text")) return;
+    if (target instanceof HTMLTextAreaElement && target.classList.contains("note-text")) {
+        const widgetId = target.dataset.widgetId;
+        if (!widgetId) return;
+
+        const widget = window.appState.widgets.find(w => w.id === widgetId);
+        if (!widget) return;
+
+        widget.data ??= {};
+        widget.data.text = target.value;
+
+      // immediate UX
+        CommandDashboard.render.autosizeTextarea(target);
+
+      // delayed persistence
+        CommandDashboard.store.scheduleSave(250);
+        return;
+    }
+
+    if (!(target instanceof HTMLElement)) return;
+    if (!target.classList.contains("widget-title")) return;
 
     const widgetId = target.dataset.widgetId;
     if (!widgetId) return;
@@ -87,13 +105,7 @@ CommandDashboard.controllers.onDashboardInput = function onDashboardInput(event)
     const widget = window.appState.widgets.find(w => w.id === widgetId);
     if (!widget) return;
 
-    widget.data ??= {};
-    widget.data.text = target.value;
-
-  // immediate UX
-    CommandDashboard.render.autosizeTextarea(target);
-
-  // delayed persistence
+    CommandDashboard.widgets.meta.setTitle(widget, target.textContent ?? "");
     CommandDashboard.store.scheduleSave(250);
 };
 
@@ -110,6 +122,39 @@ CommandDashboard.controllers.onTitleKeyDown = function onTitleKeyDown(event) {
     if (event.key === "Enter") {
         event.preventDefault();
         event.currentTarget.blur();
+    }
+};
+
+CommandDashboard.controllers.onWidgetTitleKeyDown = function onWidgetTitleKeyDown(event) {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (!target.classList.contains("widget-title")) return;
+
+    if (event.key === "Enter") {
+        event.preventDefault();
+        target.blur();
+    }
+};
+
+CommandDashboard.controllers.onWidgetTitleFocusOut = function onWidgetTitleFocusOut(event) {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (!target.classList.contains("widget-title")) return;
+
+    const widgetId = target.dataset.widgetId;
+    if (!widgetId) return;
+
+    const widget = window.appState.widgets.find(w => w.id === widgetId);
+    if (!widget) return;
+
+    const storedTitle = CommandDashboard.widgets.meta.getTitle(widget);
+    if (!storedTitle) {
+        target.textContent = "";
+        return;
+    }
+
+    if (target.textContent !== storedTitle) {
+        target.textContent = storedTitle;
     }
 };
 

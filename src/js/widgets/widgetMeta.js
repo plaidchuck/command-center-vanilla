@@ -33,7 +33,7 @@ CommandDashboard.widgets.meta.getTitle = function getTitle(widget) {
 CommandDashboard.widgets.meta.setTitle = function setTitle(widget, title) {
     const meta = _ensureMeta(widget);
     if (!meta) return;
-    const normalized = String(title ?? "").trim();
+    const normalized = String(title ?? "").replace(/\s+/g, " ").trim();
     meta.title = normalized;
 };
 
