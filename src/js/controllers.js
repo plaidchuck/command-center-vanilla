@@ -89,7 +89,7 @@ CommandDashboard.controllers.onDashboardInput = function onDashboardInput(event)
         widget.data.text = target.value;
 
       // immediate UX
-        CommandDashboard.render.autosizeTextarea(target);
+        CommandDashboard.widgets.note.autosizeTextarea(target);
 
       // delayed persistence
         CommandDashboard.store.scheduleSave(250);
@@ -167,7 +167,7 @@ CommandDashboard.controllers.onAddNote = function onAddNote() {
         state.widgets.push(newWidget);
     });
 
-    CommandDashboard.render.focusNote(newWidget.id);
+    CommandDashboard.widgets.note.focusNote(newWidget.id);
 };
 
 // Widget button action dispatcher

@@ -27,7 +27,7 @@ function _deleteWidget(widgetId) {
                 state.widgets.splice(i, 0, deletedWidget);
             });
             if (deletedWidget.type === "note") {
-                CommandDashboard.render.focusNote(deletedWidget.id);
+                CommandDashboard.widgets.note.focusNote(deletedWidget.id);
             }
         }
     };
@@ -64,7 +64,7 @@ function _pinWidget(widgetId, pin) {
         state.widgets.splice(insertIndex, 0, widget);
     });
 
-    CommandDashboard.render.focusNote(widgetId);
+    CommandDashboard.widgets.note.focusNote(widgetId);
 }
 
 CommandDashboard.handlers["widget-delete"] = function widgetDeleteHandler({ widgetId }) {
