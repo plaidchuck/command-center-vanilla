@@ -4,6 +4,11 @@ CommandDashboard.widgets = CommandDashboard.widgets ?? {};
 CommandDashboard.widgets.chrome = CommandDashboard.widgets.chrome ?? {};
 console.log("Widget chrome loaded");
 
+/**
+ * Creates the chrome header for a widget.
+ * @param {Widget} widget
+ * @returns {HTMLDivElement}
+ */
 function _createHeader(widget) {
     const header = document.createElement("div");
     header.className = "widget-header";
@@ -49,6 +54,11 @@ function _createHeader(widget) {
     return header;
 }
 
+/**
+ * Creates chrome wrapper elements for a widget.
+ * @param {Widget} widget
+ * @returns {{outer: HTMLDivElement, body: HTMLDivElement}}
+ */
 CommandDashboard.widgets.chrome.create = function createWidgetChrome(widget) {
     const outer = document.createElement("div");
     outer.className = "widget";

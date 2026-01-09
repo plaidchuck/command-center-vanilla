@@ -3,6 +3,10 @@ window.CommandDashboard = window.CommandDashboard ?? {};
 CommandDashboard.events = CommandDashboard.events ?? {};
 console.log("Loaded event listeners");
 
+/**
+ * Binds DOM event handlers for the dashboard UI.
+ * @param {{dashboard: HTMLElement, addNoteBtn: HTMLButtonElement, headerTitle: HTMLElement, clearNotesBtn: HTMLButtonElement, exportBtn: HTMLButtonElement, importBtn: HTMLButtonElement, importFileInput: HTMLInputElement}} ui
+ */
 CommandDashboard.events.bind = function bindEvents(ui) {
     const controllers = CommandDashboard.controllers;
 

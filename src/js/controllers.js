@@ -4,11 +4,20 @@ CommandDashboard.controllers = CommandDashboard.controllers ?? {};
 console.log("Loaded controllers");
 
 
+/**
+ * Opens the file picker for importing state.
+ * @param {MouseEvent} event
+ */
 CommandDashboard.controllers.onImportClick = function onImportClick(event) {
     event.preventDefault();
     CommandDashboard.io.openImportPicker();
 };
 
+/**
+ * Handles JSON file selection and imports state.
+ * @param {Event} event
+ * @returns {Promise<void>}
+ */
 CommandDashboard.controllers.onImportFileChange = async function onImportFileChange(event) {
     const input = event.currentTarget;
     if (!(input instanceof HTMLInputElement)) return;
@@ -49,6 +58,10 @@ CommandDashboard.controllers.onImportFileChange = async function onImportFileCha
     }
 };
 
+/**
+ * Exports the current application state to JSON.
+ * @param {MouseEvent} event
+ */
 CommandDashboard.controllers.onExportClick = function onExportClick(event) {
     event.preventDefault();
 
@@ -76,6 +89,10 @@ CommandDashboard.controllers.onExportClick = function onExportClick(event) {
 };
 
 // Debounce to save dashboard/widget input
+/**
+ * Handles input events within the dashboard for notes and titles.
+ * @param {Event} event
+ */
 CommandDashboard.controllers.onDashboardInput = function onDashboardInput(event) {
     const target = event.target;
     if (target instanceof HTMLTextAreaElement && target.classList.contains("note-text")) {
@@ -109,6 +126,10 @@ CommandDashboard.controllers.onDashboardInput = function onDashboardInput(event)
     CommandDashboard.store.scheduleSave(250);
 };
 
+/**
+ * Updates the dashboard title from the header input.
+ * @param {Event} event
+ */
 CommandDashboard.controllers.onTitleInput = function onTitleInput (event) {
     const headerTitle = event.currentTarget;
     if (!(headerTitle instanceof HTMLElement)) return;
@@ -118,6 +139,10 @@ CommandDashboard.controllers.onTitleInput = function onTitleInput (event) {
 };
 
 // Keep title a single line
+/**
+ * Prevents new lines in the header title.
+ * @param {KeyboardEvent} event
+ */
 CommandDashboard.controllers.onTitleKeyDown = function onTitleKeyDown(event) {
     if (event.key === "Enter") {
         event.preventDefault();
@@ -125,6 +150,10 @@ CommandDashboard.controllers.onTitleKeyDown = function onTitleKeyDown(event) {
     }
 };
 
+/**
+ * Prevents new lines in widget titles.
+ * @param {KeyboardEvent} event
+ */
 CommandDashboard.controllers.onWidgetTitleKeyDown = function onWidgetTitleKeyDown(event) {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
@@ -136,6 +165,10 @@ CommandDashboard.controllers.onWidgetTitleKeyDown = function onWidgetTitleKeyDow
     }
 };
 
+/**
+ * Restores the stored widget title on focus out.
+ * @param {FocusEvent} event
+ */
 CommandDashboard.controllers.onWidgetTitleFocusOut = function onWidgetTitleFocusOut(event) {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
@@ -159,6 +192,9 @@ CommandDashboard.controllers.onWidgetTitleFocusOut = function onWidgetTitleFocus
 };
 
 // Add widget
+/**
+ * Adds a new note widget.
+ */
 CommandDashboard.controllers.onAddNote = function onAddNote() {
     const noteApi = CommandDashboard.widgets.get?.("note");
     const newWidget = noteApi.create();
@@ -171,6 +207,10 @@ CommandDashboard.controllers.onAddNote = function onAddNote() {
 };
 
 // Widget button action dispatcher
+/**
+ * Dispatches widget button actions within the dashboard.
+ * @param {MouseEvent} event
+ */
 CommandDashboard.controllers.onDashboardClick = function onDashboardClick(event) {
     const btn = event.target.closest("button");
     if (!btn) return;
@@ -191,6 +231,10 @@ CommandDashboard.controllers.onDashboardClick = function onDashboardClick(event)
 };
 
 // Clear all widgets
+/**
+ * Clears all notes with optional undo.
+ * @param {MouseEvent} event
+ */
 CommandDashboard.controllers.onClearNotes = function onClearNotes(event) {
     event.preventDefault();
 
