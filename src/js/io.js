@@ -5,6 +5,10 @@ console.log("Widget I/O loaded");
 
 // Helpers
 
+/**
+ * Creates a filename-safe timestamp.
+ * @returns {string}
+ */
 CommandDashboard.io._createTimestamp = function createTimestamp() {
     const currentDateTime = new Date();
     return ( currentDateTime.getFullYear() + "-" +
@@ -16,6 +20,12 @@ CommandDashboard.io._createTimestamp = function createTimestamp() {
     );
 }
 
+/**
+ * Exports state to a downloadable JSON file.
+ * @param {AppState} state
+ * @param {string} [filenamePrefix]
+ * @returns {string}
+ */
 CommandDashboard.io.exportStateToJson = function exportStateToJson(state, filenamePrefix = "command-dashboard") {
     const json = JSON.stringify(state, null, 2);
     const blob = new Blob([json], {type: "application/json"});
@@ -36,6 +46,10 @@ CommandDashboard.io.exportStateToJson = function exportStateToJson(state, filena
     return anchorElement.download;
 };
 
+/**
+ * Creates or returns the hidden import input element.
+ * @returns {HTMLInputElement}
+ */
 CommandDashboard.io.getImportInput = function getImportInput() {
     if (CommandDashboard.io._importFileInput) return CommandDashboard.io._importFileInput;
 
@@ -49,6 +63,9 @@ CommandDashboard.io.getImportInput = function getImportInput() {
     return input;
 };
 
+/**
+ * Opens the import file picker dialog.
+ */
 CommandDashboard.io.openImportPicker = function openImportPicker() {
     const importFileInput = CommandDashboard.io.getImportInput();
     importFileInput.value = "";

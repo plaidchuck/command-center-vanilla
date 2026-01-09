@@ -12,6 +12,10 @@ let _dashboard = null;
 let _headerTitle = null;
 let _clearNotesBtn = null;
 
+/**
+ * Creates the empty-state message element.
+ * @returns {HTMLDivElement}
+ */
 function _createEmptyMessage() {
     const msg = document.createElement("div");
     msg.textContent = "No widgets yet — click + Note to add one.";
@@ -22,6 +26,10 @@ function _createEmptyMessage() {
 /**
  * Call once from app.js after you have the elements.
  */
+/**
+ * Initializes the renderer with cached DOM nodes.
+ * @param {{dashboard: HTMLElement, headerTitle: HTMLElement, clearNotesBtn: HTMLButtonElement}} params
+ */
 CommandDashboard.render.init = function initRender({ dashboard, headerTitle, clearNotesBtn }) {
     _dashboard = dashboard;
     _headerTitle = headerTitle;
@@ -30,6 +38,10 @@ CommandDashboard.render.init = function initRender({ dashboard, headerTitle, cle
 
 /**
  * Renders the full UI from state with any stored widgets
+ */
+/**
+ * Renders the full UI from the provided state.
+ * @param {AppState} state
  */
 CommandDashboard.render.renderApp = function renderApp(state) {
     if (!_dashboard || !_headerTitle || !_clearNotesBtn) {

@@ -10,12 +10,20 @@ let _render = null;
 
 let _saveTimerId = null;
 
+/**
+ * Initializes the store with persistence and render handlers.
+ * @param {{load: () => AppState | null, save: (state: AppState) => void, render: (state: AppState) => void}} params
+ */
 CommandDashboard.store.init = function initStore({load, save, render}) {
     _load = load;
     _save = save;
     _render = render;
 };
 
+/**
+ * Loads persisted state into memory and normalizes widget metadata.
+ * @returns {boolean}
+ */
 CommandDashboard.store.hydrateFromStorage = function hydrateFromStorage() {
     if (typeof _load !== "function" || typeof _save !== "function" || typeof _render !== "function") {
         throw new Error("store.init(...) not called");
@@ -44,14 +52,25 @@ CommandDashboard.store.hydrateFromStorage = function hydrateFromStorage() {
     return true;
 };
 
+/**
+ * Returns the current app state reference.
+ * @returns {AppState}
+ */
 CommandDashboard.store.getState = function getState() {
     return window.appState;
 };
 
+/**
+ * Saves the current app state immediately.
+ */
 CommandDashboard.store.saveNow = function saveNow() {
     _save(window.appState);
 };
 
+/**
+ * Applies a mutation and persists + re-renders.
+ * @param {(state: AppState) => void} mutatorFn
+ */
 CommandDashboard.store.apply = function apply(mutatorFn) {
     if (typeof mutatorFn !== "function") {
         throw new Error("mutatorFn must be a function");
@@ -62,6 +81,10 @@ CommandDashboard.store.apply = function apply(mutatorFn) {
     _render(window.appState);
 };
 
+/**
+ * Replaces state with a new, validated state.
+ * @param {AppState} newState
+ */
 CommandDashboard.store.replace = function replace(newState) {
     if (!CommandDashboard.store.isValidState(newState)) {
         throw new Error("INVALID_STATE");
@@ -72,6 +95,10 @@ CommandDashboard.store.replace = function replace(newState) {
     _render(window.appState);
 };
 
+/**
+ * Schedules a debounced save.
+ * @param {number} [delayMs=250]
+ */
 CommandDashboard.store.scheduleSave = function scheduleSave(delayMs = 250) {
     if (typeof _save !== "function") throw new Error("store.init(...) not called");
 
@@ -82,6 +109,11 @@ CommandDashboard.store.scheduleSave = function scheduleSave(delayMs = 250) {
     }, delayMs);
 };
 
+/**
+ * Validates the state shape.
+ * @param {unknown} state
+ * @returns {state is AppState}
+ */
 CommandDashboard.store.isValidState = function isValidState(state) {
     if (!state || typeof state !== "object") return false;
     if (typeof state.schemaVersion !== "number") return false;

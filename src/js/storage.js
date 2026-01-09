@@ -6,6 +6,10 @@ console.log("Loaded storage");
 
 const STORAGE_KEY = "command-dashboard-state";
 
+/**
+ * Loads the persisted state from local storage.
+ * @returns {AppState | null}
+ */
 CommandDashboard.storage.loadState = function loadState() {
     const serializedSavedState = localStorage.getItem(STORAGE_KEY);
     if (serializedSavedState === null) {
@@ -23,6 +27,10 @@ CommandDashboard.storage.loadState = function loadState() {
     }
 }
 
+/**
+ * Saves the current state to local storage.
+ * @param {AppState} state
+ */
 CommandDashboard.storage.saveState = function saveState(state) {
     const savedState = JSON.stringify(state);
     localStorage.setItem(STORAGE_KEY, savedState);

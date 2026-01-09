@@ -3,21 +3,25 @@ window.CommandDashboard = window.CommandDashboard ?? {};
 CommandDashboard.widgets = CommandDashboard.widgets ?? {};
 console.log("Widget registry loaded");
 
+/** @type {Map<string, {render: (widget: Widget) => HTMLElement, create?: () => Widget}>} */
 const _renderersByType = new Map();
 
 /**
- * Register a widget type.
- * type: e.g. "note"
- * api: { render(widget) -> HTMLElement }
- * @type string, function
+ * Registers a widget type.
+ * @param {string} type
+ * @param {{render: (widget: Widget) => HTMLElement, create?: () => Widget}} api
  */
-
 CommandDashboard.widgets.register = function register(type, api) {
     if (!type || typeof type !== "string") throw new Error("register: type required");
     if (!api || typeof api.render !== "function") throw new Error(`register(${type}): api.render required`);
     _renderersByType.set(type, api);
 };
 
+/**
+ * Renders a widget with chrome when available.
+ * @param {Widget} widget
+ * @returns {HTMLElement | null}
+ */
 CommandDashboard.widgets.renderWidget = function renderWidget(widget) {
     const type = widget?.type;
     const api = _renderersByType.get(type);
@@ -37,6 +41,11 @@ CommandDashboard.widgets.renderWidget = function renderWidget(widget) {
     return outer ?? content;
 }
 
+/**
+ * Retrieves a widget API by type.
+ * @param {string} type
+ * @returns {{render: (widget: Widget) => HTMLElement, create?: () => Widget} | null}
+ */
 CommandDashboard.widgets.get = function get(type) {
     return _renderersByType.get(type) ?? null;
 };

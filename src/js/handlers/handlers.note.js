@@ -3,6 +3,10 @@ window.CommandDashboard = window.CommandDashboard ?? {};
 CommandDashboard.handlers = CommandDashboard.handlers ?? {};
 console.log("Note widget handlers loaded");
 
+/**
+ * Deletes a widget and shows an undo toast.
+ * @param {string} widgetId
+ */
 function _deleteWidget(widgetId) {
     if (!widgetId) return;
 
@@ -35,6 +39,11 @@ function _deleteWidget(widgetId) {
     CommandDashboard.toast.show("Widget Deleted", "info", 5000, undoAction);
 }
 
+/**
+ * Pins or unpins a widget and reorders it within the list.
+ * @param {string} widgetId
+ * @param {boolean} pin
+ */
 function _pinWidget(widgetId, pin) {
     if (!widgetId) return;
 
@@ -67,10 +76,18 @@ function _pinWidget(widgetId, pin) {
     CommandDashboard.widgets.note.focusNote(widgetId);
 }
 
+/**
+ * Handler for deleting a widget from chrome controls.
+ * @param {{widgetId: string}} payload
+ */
 CommandDashboard.handlers["widget-delete"] = function widgetDeleteHandler({ widgetId }) {
     _deleteWidget(widgetId);
 };
 
+/**
+ * Handler for toggling widget pin state.
+ * @param {{widgetId: string}} payload
+ */
 CommandDashboard.handlers["widget-pin-toggle"] = function widgetPinToggleHandler({ widgetId }) {
     if (!widgetId) return;
 
@@ -81,14 +98,26 @@ CommandDashboard.handlers["widget-pin-toggle"] = function widgetPinToggleHandler
     _pinWidget(widgetId, !pinned);
 };
 
+/**
+ * Handler for deleting a note widget.
+ * @param {{widgetId: string}} payload
+ */
 CommandDashboard.handlers["note-delete"] = function noteDeleteHandler({ widgetId }) {
     _deleteWidget(widgetId);
 };
 
+/**
+ * Handler for pinning a note widget.
+ * @param {{widgetId: string}} payload
+ */
 CommandDashboard.handlers["note-pin"] = function notePinHandler({ widgetId }) {
     _pinWidget(widgetId, true);
 };
 
+/**
+ * Handler for unpinning a note widget.
+ * @param {{widgetId: string}} payload
+ */
 CommandDashboard.handlers["note-unpin"] = function noteUnpinHandler({ widgetId }) {
     _pinWidget(widgetId, false);
 };

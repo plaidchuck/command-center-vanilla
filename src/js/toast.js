@@ -12,6 +12,17 @@ const toastHost = CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElemen
 const VALID_TYPES = new Set(["info", "success", "error"]);
 const MAX_TOASTS = 3;
 
+/**
+ * @typedef {Object} ToastActionOptions
+ * @property {string} [actionText]
+ * @property {() => void} [onAction]
+ * @property {boolean} [sticky]
+ */
+
+/**
+ * Dismisses a toast element with animation.
+ * @param {HTMLElement} toastEl
+ */
 function _dismissToast(toastEl) {
   if (!toastEl || toastEl._isRemoving) return;
   toastEl._isRemoving = true;
@@ -25,6 +36,13 @@ function _dismissToast(toastEl) {
   toastEl.addEventListener("animationend", () => toastEl.remove(), { once: true });
 }
 
+/**
+ * Displays a toast notification.
+ * @param {string} message
+ * @param {"info" | "success" | "error"} [type="info"]
+ * @param {number} [durationMs=3000]
+ * @param {ToastActionOptions | null} [options=null]
+ */
 CommandDashboard.toast.show = function showToast(
       message,
       type = "info",

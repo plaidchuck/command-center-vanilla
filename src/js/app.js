@@ -11,6 +11,7 @@ if (!CommandDashboard.io) throw new Error("i/o not loaded");
 if (!CommandDashboard.toast) throw new Error("toast not loaded");
 if (!CommandDashboard.store) throw new Error("store not loaded");
 
+/** @type {{dashboard: HTMLElement, addNoteBtn: HTMLButtonElement, headerTitle: HTMLElement, clearNotesBtn: HTMLButtonElement, exportBtn: HTMLButtonElement, importBtn: HTMLButtonElement, importFileInput: HTMLInputElement}} */
 const ui = {
     dashboard: CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("dashboard"), HTMLElement, "#dashboard"),
     addNoteBtn: CommandDashboard.dom.mustBe(CommandDashboard.dom.mustGetElementById("addNoteBtn"), HTMLButtonElement, "#addNoteBtn"),
